@@ -10,6 +10,11 @@ output:
 <br />
 <br />
 
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
 If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your data wrangling from R code to SQL you can use the power of the database while staying in RStudio with one code source.
 
 To connect RStudio to Oracle use the new [oracleConnectR R package](https://github.com/moj-analytical-services/oracleConnectR){target="_blank"}. For all other database types follow the [RStudio connect to a database](https://db.rstudio.com/getting-started/connect-to-database){target="_blank"} guidance.

@@ -10,6 +10,11 @@ output:
 <br />
 <br />
 
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
 # Why is literate SQL important?
 
 SQL can be difficult for others to read if the logic gets complex. Particualry if you start to use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While nested sQL can create elegant solutions it can be hard to read and QA.
