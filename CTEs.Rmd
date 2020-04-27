@@ -12,9 +12,9 @@ output:
 
 # Why is literate SQL important?
 
-SQL can be difficult for others to read if the logic gets complex. Particualry if you start to use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While this method can create elegant solutions it can be much harder to read than CTEs.
+SQL can be difficult for others to read if the logic gets complex. Particualry if you start to use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While nested sQL can create elegant solutions it can be hard to read and QA.
 
-Common Table Expressions is a simple way to make your SQL code is easier to read, much like a story in a logical order. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or more generically [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
+Common Table Expressions is a simple way to make your SQL code easier to read, much like a story. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or more generically [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
 
 Here is a great tutorial on CTEs with clear coloured diagrams from [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. Below we provide two simple demonstrations.
 

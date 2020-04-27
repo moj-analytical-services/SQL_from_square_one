@@ -393,22 +393,35 @@ div.tocify {
 
 
 <p><br /> <br /></p>
-<p>If you are an R user, consider running SQL on your database diretly from RStudio. This will let you take advantage of the power of the database by moving some of your data wrangling from R code to SQL.</p>
-<p>To connect RStudio to Oracle use the new <a href="https://github.com/moj-analytical-services/oracleConnectR" target="_blank">oracleConnectR R package</a>.</p>
-<div id="writing-sql-in-rstudio-you-send-to-the-database" class="section level1">
-<h1>Writing SQL in RStudio you send to the database</h1>
-<p>To demonstrate how to run SQL from RStudio we first create a temporary in-memory database using the <a href="https://rsqlite.r-dbi.org/" target="_blank">RSQLite package</a>. We then write the demonstration <a href="https://ggplot2.tidyverse.org/reference/txhousing.html" target="_blank">Texas Housing Sales</a> data from ggplot into that temproary database.</p>
-<pre class="r"><code>library(tidyverse)
-library(RSQLite)
-library(DBI)
-
-# Create an ephemeral in-memory RSQLite database
+<p>If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your data wrangling from R code to SQL you can use the power of the database while staying in RStudio with one code source.</p>
+<p>To connect RStudio to Oracle use the new <a href="https://github.com/moj-analytical-services/oracleConnectR" target="_blank">oracleConnectR R package</a>. For all other database types follow the <a href="https://db.rstudio.com/getting-started/connect-to-database" target="_blank">RStudio connect to a database</a> guidance.</p>
+<div id="write-sql-in-rstudio-and-execute-in-the-database" class="section level1">
+<h1>Write SQL in RStudio and execute in the database</h1>
+<p>To demonstrate how to run SQL on your database from RStudio we first create a temporary in-memory database using the <a href="https://rsqlite.r-dbi.org/" target="_blank">RSQLite package</a>. We then write the demonstration <a href="https://ggplot2.tidyverse.org/reference/txhousing.html" target="_blank">Texas Housing Sales</a> data from the ggplot package into that temproary database.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## -- Attaching packages --------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.3.0     v purrr   0.3.3
+## v tibble  3.0.0     v dplyr   0.8.5
+## v tidyr   1.0.2     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.4.0</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Warning: package &#39;tibble&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 3.6.2</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(RSQLite)</code></pre>
+<pre><code>## Warning: package &#39;RSQLite&#39; was built under R version 3.6.3</code></pre>
+<pre class="r"><code>library(DBI)</code></pre>
+<pre><code>## Warning: package &#39;DBI&#39; was built under R version 3.6.3</code></pre>
+<pre class="r"><code># Create an ephemeral in-memory RSQLite database
 con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 
 DBI::dbWriteTable(con, &quot;txhousing&quot;, 
                   ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
-<p>Here, using the DBI pckage we send a SQL query to the database.</p>
+<p>Here, using the DBI pckage we send a SQL query to the database ready to be executed.</p>
 <pre class="r"><code>query &lt;- DBI::dbSendQuery(con, 
                         &quot;SELECT   city,
                                   year,
@@ -420,31 +433,44 @@ DBI::dbWriteTable(con, &quot;txhousing&quot;,
                          HAVING city IN (&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)
                          ORDER BY city,
                                   year;&quot;)</code></pre>
-<p>Then we fetch the data from the database into a dataframe and plot the result.</p>
+<p>Finally, using <code>DBI::dbFetch()</code> we execute the SQL and pull the data from the database into a dataframe.</p>
 <pre class="r"><code>texas_df &lt;- DBI::dbFetch(query)
-
-texas_df %&gt;% 
+head(texas_df)</code></pre>
+<pre><code>##      city year sales
+## 1 Abilene 2002  1516
+## 2 Abilene 2003  1632
+## 3 Abilene 2004  1830
+## 4 Abilene 2005  1977
+## 5 Abilene 2006  1997
+## 6 Abilene 2007  2003</code></pre>
+<p>We can now use the data frame, such as in a plot.</p>
+<pre class="r"><code>texas_df %&gt;% 
   ggplot2::ggplot() +
   ggplot2::aes(x = year,
                y = sales,
                colour = city) +
   ggplot2::geom_line() </code></pre>
 <pre><code>## Warning: Removed 6 row(s) containing missing values (geom_path).</code></pre>
-<p><img src="RStudio_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 <div id="dbplyr-writes-sql-for-you" class="section level1">
 <h1>dbplyr writes SQL for you</h1>
-<p>We can also use the dbplyr package to write data wrangling code in dplyr that is converted into SQL automatically. Two good tutorials on this method are from <a href="https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html" target="_blank">data carpentry</a> a <a href="https://cfss.uchicago.edu/notes/sql-databases/" target="_blank">Computing for the social sciences</a> course.</p>
+<p>We can also use the <code>dbplyr</code> package to automatically create SQL code from dplyr code. Two good tutorials on this method are from <a href="https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html" target="_blank">data carpentry</a> a <a href="https://cfss.uchicago.edu/notes/sql-databases/" target="_blank">Computing for the social sciences</a> course.</p>
 <p>Again, we set up a temporary database and write a table to it.</p>
 <pre class="r"><code>con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 
 DBI::dbWriteTable(con, &quot;txhousing&quot;, 
                   ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
-<p>To use the functionality of dbplyr we use <code>dplyr::tbl()</code> to tell dplyr that a table is in a database we have set up a connectoin for (called <code>con</code>).</p>
-<pre class="r"><code>library(dbplyr)
-tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
-<p>We can now use that table in ordinary dplry like this.</p>
+<p>To use the functionality of dbplyr we use <code>dplyr::tbl()</code> to tell dplyr that a table is in a database we have set up a connection for (called <code>con</code>).</p>
+<pre class="r"><code>library(dbplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dbplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:dplyr&#39;:
+## 
+##     ident, sql</code></pre>
+<pre class="r"><code>tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
+<p>We can now use that table in ordinary dplyr code like this.</p>
 <pre class="r"><code>texas &lt;- 
   tble %&gt;% 
   dplyr::filter(year &gt;= 2002) %&gt;% 
@@ -452,7 +478,7 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
   dplyr::summarise(sales = sum(sales, na.rm = TRUE)) %&gt;% 
   dplyr::filter(city %IN% c(&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)) %&gt;% 
   dplyr::arrange(city,year) </code></pre>
-<p>Then see the SQL it is automatically creating for us.</p>
+<p>We can also view the SQL dbplyr has automatically created for us from the dplyr code.</p>
 <pre class="r"><code>texas %&gt;% dplyr::show_query()</code></pre>
 <pre><code>## &lt;SQL&gt;
 ## SELECT *
@@ -463,18 +489,18 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ## GROUP BY `city`, `year`)
 ## WHERE (`city` IN (&#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39;))
 ## ORDER BY `city`, `year`</code></pre>
-<p>Notice how ugly this SQL is copmpared to the SQL we wrote in the section above. It does the same thing but the dplry code is the better code to read and review.</p>
-<p>We are now ready to execute the SQL written and pull the data into an R data frame using <code>dplyr::collect()</code>. We can then plot the data and get the same plot as the previous DBI method.</p>
-<pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) 
-  
-texas_df %&gt;% 
+<p>Notice how ugly this SQL is copmpared to the SQL we wrote in the first section above. It does the same thing, but the dplyr code is the better SQL that is easier to read and QA.</p>
+<p>We are now ready to execute the SQL written by dbplyr and pull the data into an R data frame using <code>dplyr::collect()</code>. Only at this point is the SQL executed on the database.</p>
+<pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) </code></pre>
+<p>Finally, we can plot the data and get the same plot as the previous DBI method where we wrote our own SQL.</p>
+<pre class="r"><code>texas_df %&gt;% 
   ggplot2::ggplot() +
   ggplot2::aes(x = year,
                y = sales,
                colour = city) +
   ggplot2::geom_line() </code></pre>
 <pre><code>## Warning: Removed 6 row(s) containing missing values (geom_path).</code></pre>
-<p><img src="RStudio_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 
 <footer role="contentinfo" id="site-footer">

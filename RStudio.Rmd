@@ -10,14 +10,13 @@ output:
 <br />
 <br />
 
-If you are an R user, consider running SQL on your database diretly from RStudio. This will let you take advantage of the power of the database by moving some of your data wrangling from R code to SQL. 
+If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your data wrangling from R code to SQL you can use the power of the database while staying in RStudio with one code source.
 
-To connect RStudio to Oracle use the new [oracleConnectR R package](https://github.com/moj-analytical-services/oracleConnectR){target="_blank"}.
+To connect RStudio to Oracle use the new [oracleConnectR R package](https://github.com/moj-analytical-services/oracleConnectR){target="_blank"}. For all other database types follow the [RStudio connect to a database](https://db.rstudio.com/getting-started/connect-to-database){target="_blank"} guidance.
 
+# Write SQL in RStudio and execute in the database
 
-# Writing SQL in RStudio you send to the database
-
-To demonstrate how to run SQL from RStudio we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from ggplot into that temproary database.
+To demonstrate how to run SQL on your database from RStudio we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from the ggplot package into that temproary database.
 
 ```{r, eval = TRUE}
 library(tidyverse)
@@ -32,7 +31,7 @@ DBI::dbWriteTable(con, "txhousing",
                   overwrite = TRUE)
 ```
 
-Here, using the DBI pckage we send a SQL query to the database.
+Here, using the DBI pckage we send a SQL query to the database ready to be executed.
 
 ```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
@@ -48,12 +47,16 @@ query <- DBI::dbSendQuery(con,
                                   year;")
 ```
 
-Then we fetch the data from the database into a dataframe and plot the result. 
+Finally, using `DBI::dbFetch()` we execute the SQL and pull the data from the database into a dataframe. 
 
 ```{r, eval = TRUE}
-
 texas_df <- DBI::dbFetch(query)
+head(texas_df)
+```
 
+We can now use the data frame, such as in a plot.
+
+```{r, eval = TRUE}
 texas_df %>% 
   ggplot2::ggplot() +
   ggplot2::aes(x = year,
@@ -64,7 +67,7 @@ texas_df %>%
 
 # dbplyr writes SQL for you
 
-We can also use the dbplyr package to write data wrangling code in dplyr that is converted into SQL automatically. Two good tutorials on this method are from [data carpentry](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html){target="_blank"} a [Computing for the social sciences](https://cfss.uchicago.edu/notes/sql-databases/){target="_blank"} course.
+We can also use the `dbplyr` package to automatically create SQL code from dplyr code. Two good tutorials on this method are from [data carpentry](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html){target="_blank"} a [Computing for the social sciences](https://cfss.uchicago.edu/notes/sql-databases/){target="_blank"} course.
 
 Again, we set up a temporary database and write a table to it.
 
@@ -76,14 +79,14 @@ DBI::dbWriteTable(con, "txhousing",
                   overwrite = TRUE)
 ```
 
-To use the functionality of dbplyr we use `dplyr::tbl()` to tell dplyr that a table is in a database we have set up a connectoin for (called `con`).
+To use the functionality of dbplyr we use `dplyr::tbl()` to tell dplyr that a table is in a database we have set up a connection for (called `con`).
 
 ```{r, eval = TRUE}
 library(dbplyr)
 tble <- dplyr::tbl(con, "txhousing")
 ```
 
-We can now use that table in ordinary dplry like this.
+We can now use that table in ordinary dplyr code like this.
 
 ```{r, eval = TRUE}
 texas <- 
@@ -95,19 +98,23 @@ texas <-
   dplyr::arrange(city,year) 
 ```
 
-Then see the SQL it is automatically creating for us.
+We can also view the SQL dbplyr has automatically created for us from the dplyr code.
 
 ```{r, eval = TRUE}
 texas %>% dplyr::show_query()
 ```
 
-Notice how ugly this SQL is copmpared to the SQL we wrote in the section above. It does the same thing but the dplry code is the better code to read and review.
+Notice how ugly this SQL is copmpared to the SQL we wrote in the first section above. It does the same thing, but the dplyr code is the better SQL that is easier to read and QA.
 
-We are now ready to execute the SQL written and pull the data into an R data frame using `dplyr::collect()`. We can then plot the data and get the same plot as the previous DBI method.
+We are now ready to execute the SQL written by dbplyr and pull the data into an R data frame using `dplyr::collect()`. Only at this point is the SQL executed on the database.
 
 ```{r, eval = TRUE}
 texas_df  <- dplyr::collect(texas) 
-  
+```
+
+Finally, we can plot the data and get the same plot as the previous DBI method where we wrote our own SQL.
+
+```{r, eval = TRUE}
 texas_df %>% 
   ggplot2::ggplot() +
   ggplot2::aes(x = year,
