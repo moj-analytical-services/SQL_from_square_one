@@ -1,0 +1,117 @@
+---
+title: "Run SQL from RStudio"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+---
+
+<br />
+<br />
+
+If you are an R user, consider running SQL on your database diretly from RStudio. This will let you take advantage of the power of the database by moving some of your data wrangling from R code to SQL. 
+
+To connect RStudio to Oracle use the new [oracleConnectR R package](https://github.com/moj-analytical-services/oracleConnectR){target="_blank"}.
+
+
+# Writing SQL in RStudio you send to the database
+
+To demonstrate how to run SQL from RStudio we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from ggplot into that temproary database.
+
+```{r, eval = FALSE}
+library(tidyverse)
+library(RSQLite)
+library(DBI)
+
+# Create an ephemeral in-memory RSQLite database
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+
+DBI::dbWriteTable(con, "txhousing", 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)
+```
+
+Here, using the DBI pckage we send a SQL query to the database.
+
+```{r, eval = FALSE}
+query <- DBI::dbSendQuery(con, 
+                        "SELECT   city,
+                                  year,
+                                  sum(sales) as sales
+                         FROM     txhousing 
+                         WHERE    year >=2002
+                         GROUP BY city,
+                                  year
+                         HAVING city IN ('Abilene','Arlington','Kerrville')
+                         ORDER BY city,
+                                  year;")
+```
+
+Then we fetch the data from the database into a dataframe and plot the result. 
+
+```{r, eval = FALSE}
+
+texas_df <- DBI::dbFetch(query)
+
+texas_df %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() 
+```
+
+# dbplyr writes SQL for you
+
+We can also use the dbplyr package to write data wrangling code in dplyr that is converted into SQL automatically. Two good tutorials on this method are from [data carpentry](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html){target="_blank"} a [Computing for the social sciences](https://cfss.uchicago.edu/notes/sql-databases/){target="_blank"} course.
+
+Again, we set up a temporary database and write a table to it.
+
+```{r, eval = FALSE}
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+
+DBI::dbWriteTable(con, "txhousing", 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)
+```
+
+To use the functionality of dbplyr we use `dplyr::tbl()` to tell dplyr that a table is in a database we have set up a connectoin for (called `con`).
+
+```{r, eval = FALSE}
+library(dbplyr)
+tble <- dplyr::tbl(con, "txhousing")
+```
+
+We can now use that table in ordinary dplry like this.
+
+```{r, eval = FALSE}
+texas <- 
+  tble %>% 
+  dplyr::filter(year >= 2002) %>% 
+  dplyr::group_by(city,year) %>% 
+  dplyr::summarise(sales = sum(sales, na.rm = TRUE)) %>% 
+  dplyr::filter(city %IN% c('Abilene','Arlington','Kerrville')) %>% 
+  dplyr::arrange(city,year) 
+```
+
+Then see the SQL it is automatically creating for us.
+
+```{r, eval = FALSE}
+texas %>% dplyr::show_query()
+```
+
+Notice how ugly this SQL is copmpared to the SQL we wrote in the section above. It does the same thing but the dplry code is the better code to read and review.
+
+We are now ready to execute the SQL written and pull the data into an R data frame using `dplyr::collect()`. We can then plot the data and get the same plot as the previous DBI method.
+
+```{r, eval = FALSE}
+texas_df  <- dplyr::collect(texas) 
+  
+texas_df %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() 
+```

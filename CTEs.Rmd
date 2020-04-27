@@ -1,0 +1,88 @@
+---
+title: "Literate SQL with Common Table Expressions (CTEs)"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+---
+
+<br />
+<br />
+
+# Why is literate SQL important?
+
+SQL can be difficult for others to read if the logic gets complex. Particualry if you start to use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While this method can create elegant solutions it can be much harder to read than CTEs.
+
+Common Table Expressions is a simple way to make your SQL code is easier to read, much like a story in a logical order. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or more generically [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
+
+Here is a great tutorial on CTEs with clear coloured diagrams from [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. Below we provide two simple demonstrations.
+
+# Demonstration CTE
+
+If you are not an R user (or don't plan to be) you can safely ignore this hidden block of code.
+
+<details>
+  <summary>R Users only - database set up</summary>
+    <ul>
+
+To demonstrate CTEs we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from ggplot into that temproary database. 
+
+```{r, eval = FALSE}
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+
+DBI::dbWriteTable(con, "txhousing", 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)
+
+
+```
+
+</ul>
+</details> 
+
+<br />
+
+
+Looking just at the SQL in green text, note how we have created a Common Table Expressoin (CTE) using the word `WITH...`. We have named this CTE `recent_years` then put a SQL query in brackets after it that sums up housing sales in each city and in each year from 2002 onwards.
+
+We can then query that CTE (called `recent_years`) directly after it where we select just three Texan citites.
+
+```{r, eval = FALSE}
+query <- DBI::dbSendQuery(con, 
+                        "WITH recent_years AS 
+                        (SELECT   city,
+                                  year,
+                                  sum(sales) as sales
+                         FROM     txhousing 
+                         WHERE    year >=2002
+                         GROUP BY city,
+                                  year)
+                         SELECT *
+                         FROM recent_years
+                         WHERE city IN ('Abilene','Arlington','Kerrville')
+                         ORDER BY city,
+                                  year;")
+```
+
+# Another example
+
+Let's look at another example of a CTE. This time we find out the three cities with the biggest percerntage change in median house prices from the lowest to the highest value in the CTE we have called `top3_change`. 
+
+We then use that CTE with an inner join to the txhousing sales data to select only those three cities in the raw data.
+
+```{r, eval = FALSE}
+query <- DBI::dbSendQuery(con, 
+                        "WITH top3_change AS 
+                        (SELECT   city,
+                                  (max(median) - min(median))/ min(median) as change
+                         FROM     txhousing
+                         GROUP BY city
+                         ORDER BY change desc
+                         LIMIT 3)
+                         SELECT a.*,
+                         b.change
+                         FROM txhousing AS a
+                         INNER JOIN top3_change AS b
+                         ON a.city = b.city;")
+```

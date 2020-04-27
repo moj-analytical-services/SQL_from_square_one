@@ -1,0 +1,23 @@
+name: "SQL"
+navbar:
+  title: "SQL from square one"
+  left:
+    - text: "Learn SQL fundamentals"
+      icon: fa-key    
+      href: SQL.html
+    - text: "Literate SQL (CTEs)"
+      icon: fa-book-open    
+      href: CTEs.html
+    - text: "Run SQL from RStudio"
+      icon: fa-laptop    
+      href: RStudio.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/
+output_dir: "."
+output:
+  html_document:
+    theme: yeti
+    highlight: textmate
+    include:
+     after_body: _footer.html
