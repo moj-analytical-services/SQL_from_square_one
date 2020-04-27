@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -237,6 +236,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -265,6 +265,12 @@ $(document).ready(function () {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -423,6 +429,8 @@ texas_df %&gt;%
                y = sales,
                colour = city) +
   ggplot2::geom_line() </code></pre>
+<pre><code>## Warning: Removed 6 row(s) containing missing values (geom_path).</code></pre>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
 <div id="dbplyr-writes-sql-for-you" class="section level1">
 <h1>dbplyr writes SQL for you</h1>
@@ -446,6 +454,15 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
   dplyr::arrange(city,year) </code></pre>
 <p>Then see the SQL it is automatically creating for us.</p>
 <pre class="r"><code>texas %&gt;% dplyr::show_query()</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM (SELECT `city`, `year`, SUM(`sales`) AS `sales`
+## FROM (SELECT *
+## FROM `txhousing`
+## WHERE (`year` &gt;= 2002.0))
+## GROUP BY `city`, `year`)
+## WHERE (`city` IN (&#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39;))
+## ORDER BY `city`, `year`</code></pre>
 <p>Notice how ugly this SQL is copmpared to the SQL we wrote in the section above. It does the same thing but the dplry code is the better code to read and review.</p>
 <p>We are now ready to execute the SQL written and pull the data into an R data frame using <code>dplyr::collect()</code>. We can then plot the data and get the same plot as the previous DBI method.</p>
 <pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) 
@@ -456,6 +473,8 @@ texas_df %&gt;%
                y = sales,
                colour = city) +
   ggplot2::geom_line() </code></pre>
+<pre><code>## Warning: Removed 6 row(s) containing missing values (geom_path).</code></pre>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 
 <footer role="contentinfo" id="site-footer">

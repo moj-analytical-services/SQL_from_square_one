@@ -19,7 +19,7 @@ To connect RStudio to Oracle use the new [oracleConnectR R package](https://gith
 
 To demonstrate how to run SQL from RStudio we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from ggplot into that temproary database.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(tidyverse)
 library(RSQLite)
 library(DBI)
@@ -34,7 +34,7 @@ DBI::dbWriteTable(con, "txhousing",
 
 Here, using the DBI pckage we send a SQL query to the database.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
                         "SELECT   city,
                                   year,
@@ -50,7 +50,7 @@ query <- DBI::dbSendQuery(con,
 
 Then we fetch the data from the database into a dataframe and plot the result. 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 
 texas_df <- DBI::dbFetch(query)
 
@@ -68,7 +68,7 @@ We can also use the dbplyr package to write data wrangling code in dplyr that is
 
 Again, we set up a temporary database and write a table to it.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
 
 DBI::dbWriteTable(con, "txhousing", 
@@ -78,14 +78,14 @@ DBI::dbWriteTable(con, "txhousing",
 
 To use the functionality of dbplyr we use `dplyr::tbl()` to tell dplyr that a table is in a database we have set up a connectoin for (called `con`).
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(dbplyr)
 tble <- dplyr::tbl(con, "txhousing")
 ```
 
 We can now use that table in ordinary dplry like this.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 texas <- 
   tble %>% 
   dplyr::filter(year >= 2002) %>% 
@@ -97,7 +97,7 @@ texas <-
 
 Then see the SQL it is automatically creating for us.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 texas %>% dplyr::show_query()
 ```
 
@@ -105,7 +105,7 @@ Notice how ugly this SQL is copmpared to the SQL we wrote in the section above. 
 
 We are now ready to execute the SQL written and pull the data into an R data frame using `dplyr::collect()`. We can then plot the data and get the same plot as the previous DBI method.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 texas_df  <- dplyr::collect(texas) 
   
 texas_df %>% 
