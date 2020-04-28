@@ -23,7 +23,7 @@ The most fundamental SQL skill is how to `SELECT` one or more columns.
 
 Broadly, you simply list the columns you need after the `SELECT`, or put an * to select all of the columns. 
 
-# `FROM` tells SQL where the data is and lets you `JOIN` tables
+# `FROM` tells SQL which data to query and lets you `JOIN`
 
 There isn't really a training course on how to use `FROM` for one table. You simply put the table name after the `FROM`. However, when you want to join tables this where your `FROM statement will get more complex. 
 
@@ -52,7 +52,7 @@ Though please note that cross joins themselves are, *"..potentially an expensive
 
 2. And chapters 1 and 2 of the Datacamp course [Joining Data in SQL](https://learn.datacamp.com/courses/joining-data-in-postgresql){target="_blank"}. While this course is for the Postrgres flavour of SQL, you will find the methods will work in most flavours (e.g. Oracle or Microsoft SQL Server). 
 
-# `WHERE` will filter rows
+# `WHERE` filters rows
 
 1. The Oracle tutorial [Querying and Filtering Rows](https://livesql.oracle.com/apex/livesql/file/tutorial_FIYST7OOFBN2ESHA54YUV6WN8.html){target="_blank"} shows you how to use`WHERE` to filter rows.
 
@@ -60,7 +60,7 @@ Though please note that cross joins themselves are, *"..potentially an expensive
 
 3. And the [w3schools WHERE tutorial](https://www.w3schools.com/sql/sql_where.asp).
 
-# `GROUP BY` will aggregate rows by the values in one or more other columns
+# `GROUP BY` aggregates rows by values in one or more other columns
 
 After you have used `SELECT` to choose the columns you need `FROM` one or more tables, then filtered rows with `WHERE`, a common further step is to use `GROUP BY` to aggregate (or sum up) values in one or more columns by the values within another column (or columns). For example, to aggregate your data by a date column.  
 
@@ -70,13 +70,13 @@ After you have used `SELECT` to choose the columns you need `FROM` one or more t
 
 3. And the [w3schools GROUP BY tutorial](https://www.w3schools.com/sql/sql_groupby.asp){target="_blank"}.
 
-# `HAVING` filters the aggregated data from the `GROUP BY`
+# `HAVING` filters aggregated data from a `GROUP BY`
 
 `HAVING` is how you filter rows that have been aggregated with a `GROUP BY`. You can think of it as a version of `WHERE` created only to filter the results of a `GROUP BY`.
 
 1. See the [w3schools HAVING tutorial](https://www.w3schools.com/sql/sql_having.asp){target="_blank"}.
 
-# `ORDER BY` will order or sort rows by one or more columns
+# `ORDER BY` sorts rows by one or more columns
 
 Your data often needs to be sorted in a logical order using `ORDER BY` so that it is ready to present to a client when exported, for example.
 
@@ -126,6 +126,6 @@ Null values are a challenge in every data tool. There are specific methods depen
 
 Once you are familiar with these key skills and have used them a few times, cheat sheets are a good way to quickly remind you of what you have forgotten. There are many SQL cheat sheets online, but this [KDnuggets cheatsheet](https://www.kdnuggets.com/2018/07/sql-cheat-sheet.html){target="_blank"} combines the SQL code you need with a clear plain English explanation.
 
-# What next?
+# What should I learn next in SQL?
 
-Once you have mastered the fundamentals, we encourage you to write literate SQL using Common table expressoins. This is the next tab along in this guide.
+We encourage you to write literate SQL using Common Table Expressions, and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover these topics.

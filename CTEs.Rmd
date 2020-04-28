@@ -17,15 +17,15 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 # Why is literate SQL important?
 
-SQL can be difficult for others to read if the logic gets complex. Particualry if you start to use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While nested sQL can create elegant solutions it can be hard to read and QA.
+SQL can be difficult for others to read if the logic becomes complex. Particularly if you use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While nested SQL can create elegant solutions this can make the code harder to read and QA.
 
-Common Table Expressions is a simple way to make your SQL code easier to read, much like a story. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or more generically [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
+Common Table Expressions are a simple way to make your SQL code easier to read, much like a story. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
 
-Here is a great tutorial on CTEs with clear coloured diagrams from [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. Below we provide two simple demonstrations.
+Below are two demonstrations of CTEs. Please also review this very clear tutorial on [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. It describes CTEs visually by highlighting key parts of the SQL code when using CTEs. Also, try modules 10 to 12 of the Oracle [Subqueries](https://livesql.oracle.com/apex/livesql/file/tutorial_GMLYIBY74FPBS888XO8F1R95I.html){target="_blank"} tutorial. 
 
-# Demonstration CTE
+# Example use of a Common Table Expression
 
-If you are not an R user (or don't plan to be) you can safely ignore this hidden block of code.
+If you are not an R user (or don't plan to be) you can safely ignore this hidden block of code. It puts demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data into a temporary database. Here are all the rows of that table.
 
 <details>
   <summary>R Users only - database set up</summary>
@@ -33,27 +33,33 @@ If you are not an R user (or don't plan to be) you can safely ignore this hidden
 
 To demonstrate CTEs we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from ggplot into that temproary database. 
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
 
 DBI::dbWriteTable(con, "txhousing", 
                   ggplot2::txhousing,
                   overwrite = TRUE)
 
-
+texas_df <- DBI::dbReadTable(con, "txhousing")
 ```
 
 </ul>
 </details> 
 
+```{r, eval = TRUE, echo=FALSE}
+texas_df %>% 
+  DT::datatable(caption = "txhousing data table in a database")
+```
+
 <br />
 
+Looking just at the SQL in green text below, note how we have:
 
-Looking just at the SQL in green text, note how we have created a Common Table Expressoin (CTE) using the word `WITH...`. We have named this CTE `recent_years` then put a SQL query in brackets after it that sums up housing sales in each city and in each year from 2002 onwards.
+1. Created a Common Table Expression (CTE) using the word `WITH...`. Then named this CTE `recent_years`. The SQL for the CTE is in brackets. It sums up housing sales in each city and in each year from 2002 onwards.
 
-We can then query that CTE (called `recent_years`) directly after it where we select just three Texan citites.
+2. We then query that CTE (called `recent_years`) directly after it by selecting three Texan cities and sorting the result.
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
                         "WITH recent_years AS 
                         (SELECT   city,
@@ -70,13 +76,23 @@ query <- DBI::dbSendQuery(con,
                                   year;")
 ```
 
+```{r, eval = TRUE, echo=FALSE}
+texas_df <- DBI::dbFetch(query)
+DBI::dbClearResult(query)
+
+texas_df %>% 
+  DT::datatable(caption = "Result of the CTE")
+```
+
 # Another example
 
-Let's look at another example of a CTE. This time we find out the three cities with the biggest percerntage change in median house prices from the lowest to the highest value in the CTE we have called `top3_change`. 
+Let's look at another example of a CTE on the same data table. 
 
-We then use that CTE with an inner join to the txhousing sales data to select only those three cities in the raw data.
+1. We first find the three cities with the biggest percentage change in median house prices in a CTE we have call `top3_change`.
 
-```{r, eval = FALSE}
+2. The CTE `top3_change` is then joined (with an inner join) to the original txhousing sales table. Using an inner join will select only the cities in both tables, reducing the data to the top 3 citites.
+
+```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
                         "WITH top3_change AS 
                         (SELECT   city,
@@ -90,4 +106,14 @@ query <- DBI::dbSendQuery(con,
                          FROM txhousing AS a
                          INNER JOIN top3_change AS b
                          ON a.city = b.city;")
+```
+
+Here is the result of that SQL query.
+
+```{r, eval = TRUE, echo=FALSE}
+texas_df <- DBI::dbFetch(query)
+DBI::dbClearResult(query)
+
+texas_df %>% 
+  DT::datatable(caption = "Result of the CTE")
 ```

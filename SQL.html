@@ -405,8 +405,8 @@ div.tocify {
 </ol>
 <p>Broadly, you simply list the columns you need after the <code>SELECT</code>, or put an * to select all of the columns.</p>
 </div>
-<div id="from-tells-sql-where-the-data-is-and-lets-you-join-tables" class="section level1">
-<h1><code>FROM</code> tells SQL where the data is and lets you <code>JOIN</code> tables</h1>
+<div id="from-tells-sql-which-data-to-query-and-lets-you-join" class="section level1">
+<h1><code>FROM</code> tells SQL which data to query and lets you <code>JOIN</code></h1>
 <p>There isn’t really a training course on how to use <code>FROM</code> for one table. You simply put the table name after the <code>FROM</code>. However, when you want to join tables this where your `FROM statement will get more complex.</p>
 <p>A common way to explain the joins you can use in a <code>FROM</code> statement is with Venn diagrams like these:</p>
 <p><img src="images/joins.png" width="100%" /> * Image from <a href="https://www.w3schools.com/sql/sql_join.asp" target="_blank">w3schools SQL Tutorial</a>.</p>
@@ -423,16 +423,16 @@ div.tocify {
 <li><p>And chapters 1 and 2 of the Datacamp course <a href="https://learn.datacamp.com/courses/joining-data-in-postgresql" target="_blank">Joining Data in SQL</a>. While this course is for the Postrgres flavour of SQL, you will find the methods will work in most flavours (e.g. Oracle or Microsoft SQL Server).</p></li>
 </ol>
 </div>
-<div id="where-will-filter-rows" class="section level1">
-<h1><code>WHERE</code> will filter rows</h1>
+<div id="where-filters-rows" class="section level1">
+<h1><code>WHERE</code> filters rows</h1>
 <ol style="list-style-type: decimal">
 <li><p>The Oracle tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_FIYST7OOFBN2ESHA54YUV6WN8.html" target="_blank">Querying and Filtering Rows</a> shows you how to use<code>WHERE</code> to filter rows.</p></li>
 <li><p>Also, see chapter 2 of the DataCamp course <a href="https://www.datacamp.com/courses/introduction-to-sql" target="_blank">Introduction to SQL</a>.</p></li>
 <li><p>And the <a href="https://www.w3schools.com/sql/sql_where.asp">w3schools WHERE tutorial</a>.</p></li>
 </ol>
 </div>
-<div id="group-by-will-aggregate-rows-by-the-values-in-one-or-more-other-columns" class="section level1">
-<h1><code>GROUP BY</code> will aggregate rows by the values in one or more other columns</h1>
+<div id="group-by-aggregates-rows-by-values-in-one-or-more-other-columns" class="section level1">
+<h1><code>GROUP BY</code> aggregates rows by values in one or more other columns</h1>
 <p>After you have used <code>SELECT</code> to choose the columns you need <code>FROM</code> one or more tables, then filtered rows with <code>WHERE</code>, a common further step is to use <code>GROUP BY</code> to aggregate (or sum up) values in one or more columns by the values within another column (or columns). For example, to aggregate your data by a date column.</p>
 <ol style="list-style-type: decimal">
 <li><p>The oracle Tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_G1UNQOOO9YNU723ZMVP6EGJIO.html" target="_blank">Aggregating Rows</a> describes how to both aggregate rows and use <code>DISTINCT</code> to find unique values.</p></li>
@@ -440,15 +440,15 @@ div.tocify {
 <li><p>And the <a href="https://www.w3schools.com/sql/sql_groupby.asp" target="_blank">w3schools GROUP BY tutorial</a>.</p></li>
 </ol>
 </div>
-<div id="having-filters-the-aggregated-data-from-the-group-by" class="section level1">
-<h1><code>HAVING</code> filters the aggregated data from the <code>GROUP BY</code></h1>
+<div id="having-filters-aggregated-data-from-a-group-by" class="section level1">
+<h1><code>HAVING</code> filters aggregated data from a <code>GROUP BY</code></h1>
 <p><code>HAVING</code> is how you filter rows that have been aggregated with a <code>GROUP BY</code>. You can think of it as a version of <code>WHERE</code> created only to filter the results of a <code>GROUP BY</code>.</p>
 <ol style="list-style-type: decimal">
 <li>See the <a href="https://www.w3schools.com/sql/sql_having.asp" target="_blank">w3schools HAVING tutorial</a>.</li>
 </ol>
 </div>
-<div id="order-by-will-order-or-sort-rows-by-one-or-more-columns" class="section level1">
-<h1><code>ORDER BY</code> will order or sort rows by one or more columns</h1>
+<div id="order-by-sorts-rows-by-one-or-more-columns" class="section level1">
+<h1><code>ORDER BY</code> sorts rows by one or more columns</h1>
 <p>Your data often needs to be sorted in a logical order using <code>ORDER BY</code> so that it is ready to present to a client when exported, for example.</p>
 <ol style="list-style-type: decimal">
 <li><p>Oracle methods that are common to most SQL flavours to sort rows are covered well in <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_GMY4RMH9LDCPYKJC615PEOZHT.html" target="_blank">Sorting and Limiting Rows</a>.</p></li>
@@ -485,9 +485,9 @@ div.tocify {
 <h1>Cheat sheets</h1>
 <p>Once you are familiar with these key skills and have used them a few times, cheat sheets are a good way to quickly remind you of what you have forgotten. There are many SQL cheat sheets online, but this <a href="https://www.kdnuggets.com/2018/07/sql-cheat-sheet.html" target="_blank">KDnuggets cheatsheet</a> combines the SQL code you need with a clear plain English explanation.</p>
 </div>
-<div id="what-next" class="section level1">
-<h1>What next?</h1>
-<p>Once you have mastered the fundamentals, we encourage you to write literate SQL using Common table expressoins. This is the next tab along in this guide.</p>
+<div id="what-should-i-learn-next-in-sql" class="section level1">
+<h1>What should I learn next in SQL?</h1>
+<p>We encourage you to write literate SQL using Common Table Expressions, and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover these topics.</p>
 </div>
 
 <footer role="contentinfo" id="site-footer">
