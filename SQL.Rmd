@@ -25,9 +25,9 @@ Broadly, you simply list the columns you need after the `SELECT`, or put an * to
 
 # `FROM` tells SQL which data to query and lets you `JOIN`
 
-There isn't really a training course on how to use `FROM` for one table. You simply put the table name after the `FROM`. However, when you want to join tables this where your `FROM statement will get more complex. 
+There isn't really a training course on how to use `FROM` for one table. You simply put the table name after the `FROM`. However, when you want to join tables this is where your `FROM statement will get more complex. 
 
-A common way to explain the joins you can use in a `FROM` statement is with Venn diagrams like these:
+A common way to explain the joins you put after the `FROM` statement is with Venn diagrams like these:
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, out.width = "100%"}
 knitr::include_graphics("images/joins.png") 
@@ -38,12 +38,12 @@ knitr::include_graphics("images/joins.png")
   <summary>Note that some reject the Venn diagram explanation for joins</summary>
     <ul>
 
-Though some reject the Venn diagram explanation and say [Say NO to Venn Diagrams When Explaining JOINs](https://blog.jooq.org/2016/07/05/say-no-to-venn-diagrams-when-explaining-joins/){target="_blank"}. Instead they explain that all joins begin with a `CROSS JOIN` (where every row on the left table is combined with every row on the right table), then all other joins (e.g. `INNER JOIN`) are a filtered version of that `CROSS JOIN`. 
+Though some say ["Say NO to Venn Diagrams When Explaining Joins"](https://blog.jooq.org/2016/07/05/say-no-to-venn-diagrams-when-explaining-joins/){target="_blank"}. Instead, all joins begin with a `CROSS JOIN` (where every row on the left table is combined with every row on the right table), then all other joins (e.g. `INNER JOIN`) are a filtered version of that `CROSS JOIN`. A cross join is also known as the [Caretsian product](https://en.wikipedia.org/wiki/Cartesian_product) of the two tables.
 
 ![](https://www.essentialsql.com/wp-content/uploads/2016/08/Cross-Join-Two-Tables-to-Get-Combinations.png){width=60%}
 * Image from [Essential SQL](https://www.essentialsql.com/cross-join-introduction/){target="_blank}.
 
-Though please note that cross joins themselves are, *"..potentially an expensive and dangerous operation since it can lead to a large data explosion. It is best used in scenarios where a normal join cannot be used and very selective predicates are being used in the WHERE clause to limit the number of produced rows"* [Microsoft Docs](https://docs.microsoft.com/en-us/u-sql/statements-and-expressions/select/from/joins/cross-join). In other words, if you do use a cross join, make sure it is filtered with a `WHERE` clause.
+Though please note that cross joins are, *"..potentially an expensive and dangerous operation since it can lead to a large data explosion. It is best used in scenarios where a normal join cannot be used and very selective predicates are being used in the WHERE clause to limit the number of produced rows"* [Microsoft Docs](https://docs.microsoft.com/en-us/u-sql/statements-and-expressions/select/from/joins/cross-join). In other words, if you do use a cross join, make sure it is filtered with a `WHERE` clause.
 
 </ul>
 </details>
@@ -128,4 +128,4 @@ Once you are familiar with these key skills and have used them a few times, chea
 
 # What should I learn next in SQL?
 
-We encourage you to write literate SQL using Common Table Expressions, and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover these topics.
+We encourage you to write literate SQL using Common Table Expressions (CTEs), and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover [CTEs](https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html) and [RStudio with SQL](https://moj-analytical-services.github.io/SQL_from_square_one/RStudio.html).

@@ -393,7 +393,7 @@ div.tocify {
 
 
 <p><br /> <br /></p>
-<p>If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your heaviest data wrangling from R code to SQL you can use the power of the database while still staying in RStudio with all your code in one place.</p>
+<p>If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your heaviest data wrangling from R code to SQL you can use the greater speeed of the database while still staying in RStudio with all your code in one place.</p>
 <p>To connect RStudio to Oracle use the new <a href="https://github.com/moj-analytical-services/oracleConnectR" target="_blank">oracleConnectR R package</a>. To connect all other database types to RStudio, follow the <a href="https://db.rstudio.com/getting-started/connect-to-database" target="_blank">RStudio connect to a database</a> guidance.</p>
 <div id="write-sql-in-rstudio-and-execute-in-the-database" class="section level1">
 <h1>Write SQL in RStudio and execute in the database</h1>
@@ -408,7 +408,7 @@ con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 DBI::dbWriteTable(con, &quot;txhousing&quot;, 
                   ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
-<p>Here, using the DBI pckage, we send a SQL query to the database ready to be executed.</p>
+<p>Here, using the <code>DBI</code> pckage, we send a SQL query to the database ready to be executed.</p>
 <pre class="r"><code>query &lt;- DBI::dbSendQuery(con, 
                         &quot;SELECT   city,
                                   year,
@@ -441,26 +441,48 @@ head(texas_df)</code></pre>
 <p><img src="RStudio_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 <div id="dbplyr-writes-sql-for-you-from-dplyr-code" class="section level1">
-<h1><code>dbplyr</code> writes SQL for you from dplyr code</h1>
-<p>We can also use the <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank"><code>dbplyr</code></a> package to automatically create SQL code from your dplyr code. Two good tutorials on this method are from <a href="https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html" target="_blank">data carpentry</a> and a <a href="https://cfss.uchicago.edu/notes/sql-databases/" target="_blank">Computing for the social sciences</a> course.</p>
+<h1><code>dbplyr</code> writes SQL for you from <code>dplyr</code> code</h1>
+<p>We can also use the <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank"><code>dbplyr</code></a> package to automatically create SQL code from your <code>dplyr</code> code.</p>
+<p>Three good tutorials on this method are:</p>
+<ol style="list-style-type: decimal">
+<li><a href="https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html" target="_blank">data carpentry</a>.</li>
+<li>A <a href="https://cfss.uchicago.edu/notes/sql-databases/" target="_blank">Computing for the social sciences</a> course.</li>
+<li>RStudio’s <a href="https://db.rstudio.com/dplyr/" target="_blank">Databases using dplyr</a>.</li>
+</ol>
+<div id="why-use-dbplyr" class="section level2">
+<h2>Why use <code>dbplyr</code>?</h2>
+<p>But why is this useful? It may be that <strong>“You have so much data that it does not all fit into memory simultaneously and you need to use some external storage engine”</strong>.</p>
+<p>You may also find that using the database leads to dramatic speed-up of your data wrangling if you <a href="https://www.alexejgossmann.com/benchmarking_r/" target="_blank">benchmark</a> between the two methods. A faster method will likely scale better if future applications of your work tackle greater data volumes.</p>
+</div>
+<div id="how-to-use-dbplyr" class="section level2">
+<h2>How to use <code>dbplyr</code></h2>
 <p>Again, we set up a temporary database and write a table to it.</p>
 <pre class="r"><code>con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 
 DBI::dbWriteTable(con, &quot;txhousing&quot;, 
                   ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
-<p>To use the functionality of dbplyr we use <code>dplyr::tbl()</code>. This tells dplyr that this table is in a database that we have set up a connection for (called <code>con</code>).</p>
+<p>To use the functionality of <code>dbplyr</code> we use <code>dplyr::tbl()</code>. This tells <code>dplyr</code> that this table is in a database that we have set up a connection for (called <code>con</code>).</p>
 <pre class="r"><code>library(dbplyr)
 tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
-<p>Now, when we use that table in ordinary dplyr code like this, dplyr knows it is a database table and will be creating the SQL for it automatically in the background.</p>
+<p>Now, when we use that table in ordinary <code>dplyr</code> code like this, <code>dplyr</code> knows it is a database table and <code>dbplyr</code> will translate it into SQL automatically in the background.</p>
 <pre class="r"><code>texas &lt;- 
   tble %&gt;% 
   dplyr::filter(year &gt;= 2002) %&gt;% 
   dplyr::group_by(city,year) %&gt;% 
   dplyr::summarise(sales = sum(sales, na.rm = TRUE)) %&gt;% 
-  dplyr::filter(city %IN% c(&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)) %&gt;% 
+  dplyr::filter(city %IN% c(&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)) </code></pre>
+</div>
+<div id="what-is-dbplyr-doing-for-us" class="section level2">
+<h2>What is <code>dbplyr</code> doing for us?</h2>
+<p>Because <code>dbplyr</code> is “lazy”, the R object we have created (<code>texas</code>) has not pulled the data or executed the SQL in the database.</p>
+<blockquote>
+<p>“When working with databases, dplyr tries to be as lazy as possible: It never pulls data into R unless you explicitly ask for it. It delays doing any work until the last possible moment: it collects together everything you want to do and then sends it to the database in one step.” From <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank">Introduction to dbplyr</a>.</p>
+</blockquote>
+<p>This means We can carry on adding <code>dplyr</code> logic. For example, below we add on a sort by <code>city</code> and <code>year</code> using <code>dplyr::arrange()</code>. This simply adds to the SQL logic stored in <code>texas</code>.</p>
+<pre class="r"><code>texas &lt;- texas %&gt;% 
   dplyr::arrange(city,year) </code></pre>
-<p>We can also view the SQL dbplyr has automatically created for us from the dplyr code.</p>
+<p>We can also view the SQL <code>dbplyr</code> has automatically created for us from the <code>dplyr</code> code by piping <code>texas</code> into the function <code>dplyr::collect()</code>.</p>
 <pre class="r"><code>texas %&gt;% dplyr::show_query()</code></pre>
 <pre><code>## &lt;SQL&gt;
 ## SELECT *
@@ -471,17 +493,152 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ## GROUP BY `city`, `year`)
 ## WHERE (`city` IN (&#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39;))
 ## ORDER BY `city`, `year`</code></pre>
-<p>Notice how ugly this SQL is compared to the SQL we wrote in the first section above. It does the same thing, but this automatically created SQL by dbplyr is harder to read and QA.</p>
-<p>We are now ready to execute the SQL written by dbplyr and pull the data into an R data frame using <code>dplyr::collect()</code>. Only at this point is the SQL executed on the database.</p>
-<pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) </code></pre>
-<p>Finally, we can plot the data and get the same plot as the previous method where we wrote our own SQL.</p>
-<pre class="r"><code>texas_df %&gt;% 
+<p>Notice how ugly this SQL is compared to the SQL we wrote in the first section above. It creates the same result, but automatically created SQL from <code>dbplyr</code> is usually difficult to read. For this reason, we would only QA the <code>dplyr</code> code that created the SQL. It would also not be a good idea to re-use the automatically generated SQL elsewhere.</p>
+<p>If we need to understand or de-bug our chained <code>dplyr</code> steps, we can use the <code>dplyr::glimpse()</code> or <code>utils::head()</code> to quickly preview the top few rows for parts of our logic.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::filter(year &gt;= 2002) %&gt;% utils::head()</code></pre>
+<pre><code>## # Source:   lazy query [?? x 9]
+## # Database: sqlite 3.30.1 [:memory:]
+##   city     year month sales   volume median listings inventory  date
+##   &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 Abilene  2002     1    94  6530000  64000      652       5.4 2002 
+## 2 Abilene  2002     2    94  6860000  62900      746       6.3 2002.
+## 3 Abilene  2002     3   107  8385000  62100      774       6.5 2002.
+## 4 Abilene  2002     4   135 10465000  66900      767       6.3 2002.
+## 5 Abilene  2002     5   154 11465000  69200      778       6.4 2002.
+## 6 Abilene  2002     6   136 11600000  76700      758       6.3 2002.</code></pre>
+<p>The R object <code>texas</code> that <code>dbplyr</code> has created is a nested list of instructions. We can inspect what’s inside from the Environment pane, or by using <code>utils::str()</code>.</p>
+<pre class="r"><code>utils::str(texas)</code></pre>
+<pre><code>## List of 2
+##  $ src:List of 2
+##   ..$ con  :Formal class &#39;SQLiteConnection&#39; [package &quot;RSQLite&quot;] with 7 slots
+##   .. .. ..@ ptr                :&lt;externalptr&gt; 
+##   .. .. ..@ dbname             : chr &quot;:memory:&quot;
+##   .. .. ..@ loadable.extensions: logi TRUE
+##   .. .. ..@ flags              : int 70
+##   .. .. ..@ vfs                : chr &quot;&quot;
+##   .. .. ..@ ref                :&lt;environment: 0x000001aba3494428&gt; 
+##   .. .. ..@ bigint             : chr &quot;integer64&quot;
+##   ..$ disco: NULL
+##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_SQLiteConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
+##  $ ops:List of 4
+##   ..$ name: chr &quot;arrange&quot;
+##   ..$ x   :List of 4
+##   .. ..$ name: chr &quot;filter&quot;
+##   .. ..$ x   :List of 4
+##   .. .. ..$ name: chr &quot;summarise&quot;
+##   .. .. ..$ x   :List of 4
+##   .. .. .. ..$ name: chr &quot;group_by&quot;
+##   .. .. .. ..$ x   :List of 4
+##   .. .. .. .. ..$ name: chr &quot;filter&quot;
+##   .. .. .. .. ..$ x   :List of 2
+##   .. .. .. .. .. ..$ x   : &#39;ident&#39; chr &quot;txhousing&quot;
+##   .. .. .. .. .. ..$ vars: chr [1:9] &quot;city&quot; &quot;year&quot; &quot;month&quot; &quot;sales&quot; ...
+##   .. .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_base_remote&quot; &quot;op_base&quot; &quot;op&quot;
+##   .. .. .. .. ..$ dots:List of 1
+##   .. .. .. .. .. ..$ : language ~year &gt;= 2002
+##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001ab9f8ac488&gt; 
+##   .. .. .. .. ..$ args: list()
+##   .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. .. .. ..$ dots:List of 2
+##   .. .. .. .. ..$ city: symbol city
+##   .. .. .. .. ..$ year: symbol year
+##   .. .. .. ..$ args:List of 1
+##   .. .. .. .. ..$ add: logi FALSE
+##   .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_group_by&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. .. ..$ dots:List of 1
+##   .. .. .. ..$ sales: language ~sum(sales, na.rm = TRUE)
+##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba3035a48&gt; 
+##   .. .. ..$ args: list()
+##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_summarise&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. ..$ dots:List of 1
+##   .. .. ..$ : language ~city %IN% c(&quot;Abilene&quot;, &quot;Arlington&quot;, &quot;Kerrville&quot;)
+##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001ab9ee02998&gt; 
+##   .. ..$ args: list()
+##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
+##   ..$ dots:List of 2
+##   .. ..$ : language ~city
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba316f238&gt; 
+##   .. ..$ : language ~year
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba316f238&gt; 
+##   ..$ args:List of 1
+##   .. ..$ .by_group: logi FALSE
+##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_arrange&quot; &quot;op_single&quot; &quot;op&quot;
+##  - attr(*, &quot;class&quot;)= chr [1:5] &quot;tbl_SQLiteConnection&quot; &quot;tbl_dbi&quot; &quot;tbl_sql&quot; &quot;tbl_lazy&quot; ...</code></pre>
+</div>
+<div id="execute-the-sql-dbplyr-has-created-for-us" class="section level2">
+<h2>Execute the SQL <code>dbplyr</code> has created for us</h2>
+<p>Finally, when we want to use the R object <code>texas</code> such as in a plot, <code>dbplyr</code> realises we need the data inside R to create it. The SQL is executed on the database and the data is pulled into RStudio. Note this plot is the same plot as from the previous method above where we wrote our own SQL.</p>
+<pre class="r"><code>texas %&gt;% 
   ggplot2::ggplot() +
   ggplot2::aes(x = year,
                y = sales,
                colour = city) +
   ggplot2::geom_line() </code></pre>
-<p><img src="RStudio_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>We could also tell <code>dbplyr</code> to execute the SQL and pull the data into an R dataframe using <code>dplyr::collect()</code>. For example, to carry out further data manipulation within RStudio.</p>
+<pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) 
+
+head(texas_df)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+## # Groups:   city [1]
+##   city     year sales
+##   &lt;chr&gt;   &lt;int&gt; &lt;dbl&gt;
+## 1 Abilene  2002  1516
+## 2 Abilene  2003  1632
+## 3 Abilene  2004  1830
+## 4 Abilene  2005  1977
+## 5 Abilene  2006  1997
+## 6 Abilene  2007  2003</code></pre>
+</div>
+<div id="what-if-a-dplyr-verb-wont-convert-to-sql" class="section level2">
+<h2>What if a <code>dplyr</code> verb won’t convert to SQL?</h2>
+<p>Some <code>dplyr</code> verbs have no direct equivalent in SQL and will return an error. For example, below we try to use <code>dplyr::slice()</code> to select the highest number of sales for each city in any month. This returns an error when run on the <code>tble</code> that is a table in our database.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::group_by(city) %&gt;% 
+  dplyr::arrange(desc(sales)) %&gt;% 
+  dplyr::slice(1)</code></pre>
+<pre><code>## Error in UseMethod(&quot;slice_&quot;): no applicable method for &#39;slice_&#39; applied to an object of class &quot;c(&#39;tbl_SQLiteConnection&#39;, &#39;tbl_dbi&#39;, &#39;tbl_sql&#39;, &#39;tbl_lazy&#39;, &#39;tbl&#39;)&quot;</code></pre>
+<p><code>dplyr::slice()</code> will only work if we bring the data into R using <code>dplyr::collect()</code> as shown below. However, we have had to pull all of our data into R. If this is a very large table this may not fit into R, or it could greatly slow down our data wrangling.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::collect() %&gt;% 
+  dplyr::group_by(city) %&gt;% 
+  dplyr::arrange(desc(sales)) %&gt;% 
+  dplyr::slice(1) %&gt;% 
+  dplyr::select(city,year,month,sales) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 4
+## # Groups:   city [6]
+##   city       year month sales
+##   &lt;chr&gt;     &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1 Abilene    2015     7   268
+## 2 Amarillo   2011     8   390
+## 3 Arlington  2006     6   720
+## 4 Austin     2015     7  3466
+## 5 Bay Area   2015     7   849
+## 6 Beaumont   2015     7   318</code></pre>
+<p>An alternative is to use a combination of <code>dplyr</code> verbs that <em>will</em> convert to SQL achieve the same result. Or, as below, we write the SQL ourselves for this particular <a href="https://stackoverflow.com/a/34715134/11105756">task</a>. We use a Common Table Expression that is explained further in our guide <a href="https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html">here</a>.</p>
+<pre class="r"><code>query &lt;- DBI::dbSendQuery(con, &quot;
+WITH cte AS (
+   SELECT city,
+          year,
+          month,
+          sales, 
+          row_number() OVER(PARTITION BY city ORDER BY sales DESC) AS rownum
+   FROM   txhousing
+   )
+SELECT  *
+FROM   cte
+WHERE  rownum = 1;&quot;)
+DBI::dbFetch(query, n = 6)</code></pre>
+<pre><code>##        city year month sales rownum
+## 1   Abilene 2015     7   268      1
+## 2  Amarillo 2011     8   390      1
+## 3 Arlington 2006     6   720      1
+## 4    Austin 2015     7  3466      1
+## 5  Bay Area 2015     7   849      1
+## 6  Beaumont 2015     7   318      1</code></pre>
+<pre class="r"><code>DBI::dbClearResult(query)</code></pre>
+</div>
 </div>
 
 <footer role="contentinfo" id="site-footer">

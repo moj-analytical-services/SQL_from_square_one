@@ -407,15 +407,15 @@ div.tocify {
 </div>
 <div id="from-tells-sql-which-data-to-query-and-lets-you-join" class="section level1">
 <h1><code>FROM</code> tells SQL which data to query and lets you <code>JOIN</code></h1>
-<p>There isn’t really a training course on how to use <code>FROM</code> for one table. You simply put the table name after the <code>FROM</code>. However, when you want to join tables this where your `FROM statement will get more complex.</p>
-<p>A common way to explain the joins you can use in a <code>FROM</code> statement is with Venn diagrams like these:</p>
+<p>There isn’t really a training course on how to use <code>FROM</code> for one table. You simply put the table name after the <code>FROM</code>. However, when you want to join tables this is where your `FROM statement will get more complex.</p>
+<p>A common way to explain the joins you put after the <code>FROM</code> statement is with Venn diagrams like these:</p>
 <p><img src="images/joins.png" width="100%" /> * Image from <a href="https://www.w3schools.com/sql/sql_join.asp" target="_blank">w3schools SQL Tutorial</a>.</p>
 <details>
 <summary>Note that some reject the Venn diagram explanation for joins</summary>
 <ul>
-<p>Though some reject the Venn diagram explanation and say <a href="https://blog.jooq.org/2016/07/05/say-no-to-venn-diagrams-when-explaining-joins/" target="_blank">Say NO to Venn Diagrams When Explaining JOINs</a>. Instead they explain that all joins begin with a <code>CROSS JOIN</code> (where every row on the left table is combined with every row on the right table), then all other joins (e.g. <code>INNER JOIN</code>) are a filtered version of that <code>CROSS JOIN</code>.</p>
+<p>Though some say <a href="https://blog.jooq.org/2016/07/05/say-no-to-venn-diagrams-when-explaining-joins/" target="_blank">“Say NO to Venn Diagrams When Explaining Joins”</a>. Instead, all joins begin with a <code>CROSS JOIN</code> (where every row on the left table is combined with every row on the right table), then all other joins (e.g. <code>INNER JOIN</code>) are a filtered version of that <code>CROSS JOIN</code>. A cross join is also known as the <a href="https://en.wikipedia.org/wiki/Cartesian_product">Caretsian product</a> of the two tables.</p>
 <p><img src="https://www.essentialsql.com/wp-content/uploads/2016/08/Cross-Join-Two-Tables-to-Get-Combinations.png" style="width:60.0%" /> * Image from <a href="https://www.essentialsql.com/cross-join-introduction/" target="&quot;_blank">Essential SQL</a>.</p>
-<p>Though please note that cross joins themselves are, <em>“..potentially an expensive and dangerous operation since it can lead to a large data explosion. It is best used in scenarios where a normal join cannot be used and very selective predicates are being used in the WHERE clause to limit the number of produced rows”</em> <a href="https://docs.microsoft.com/en-us/u-sql/statements-and-expressions/select/from/joins/cross-join">Microsoft Docs</a>. In other words, if you do use a cross join, make sure it is filtered with a <code>WHERE</code> clause.</p>
+<p>Though please note that cross joins are, <em>“..potentially an expensive and dangerous operation since it can lead to a large data explosion. It is best used in scenarios where a normal join cannot be used and very selective predicates are being used in the WHERE clause to limit the number of produced rows”</em> <a href="https://docs.microsoft.com/en-us/u-sql/statements-and-expressions/select/from/joins/cross-join">Microsoft Docs</a>. In other words, if you do use a cross join, make sure it is filtered with a <code>WHERE</code> clause.</p>
 </ul>
 </details>
 <ol style="list-style-type: decimal">
@@ -487,7 +487,7 @@ div.tocify {
 </div>
 <div id="what-should-i-learn-next-in-sql" class="section level1">
 <h1>What should I learn next in SQL?</h1>
-<p>We encourage you to write literate SQL using Common Table Expressions, and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover these topics.</p>
+<p>We encourage you to write literate SQL using Common Table Expressions (CTEs), and if you are an RStudio user, to write and run SQL from there. The next two pages in this guide cover <a href="https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html">CTEs</a> and <a href="https://moj-analytical-services.github.io/SQL_from_square_one/RStudio.html">RStudio with SQL</a>.</p>
 </div>
 
 <footer role="contentinfo" id="site-footer">
