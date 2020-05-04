@@ -410,16 +410,18 @@ DBI::dbWriteTable(con, &quot;txhousing&quot;,
                   overwrite = TRUE)</code></pre>
 <p>Here, using the <code>DBI</code> pckage, we send a SQL query to the database ready to be executed.</p>
 <pre class="r"><code>query &lt;- DBI::dbSendQuery(con, 
-                        &quot;SELECT   city,
-                                  year,
-                                  sum(sales) as sales
-                         FROM     txhousing 
-                         WHERE    year &gt;=2002
-                         GROUP BY city,
-                                  year
-                         HAVING city IN (&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)
-                         ORDER BY city,
-                                  year;&quot;)</code></pre>
+                        &quot;
+SELECT city, 
+       year, 
+       Sum(sales) AS sales 
+FROM   txhousing 
+WHERE  year &gt;= 2002 
+GROUP  BY city, 
+          year 
+HAVING city IN ( &#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39; ) 
+ORDER  BY city, 
+          year; 
+&quot;)</code></pre>
 <p>Finally, using <code>DBI::dbFetch()</code> we execute the SQL and pull the data from the database into a dataframe called <code>texas_df</code>.</p>
 <pre class="r"><code>texas_df &lt;- DBI::dbFetch(query)
 DBI::dbClearResult(query)
@@ -440,7 +442,7 @@ head(texas_df)</code></pre>
   ggplot2::geom_line() </code></pre>
 <p><img src="RStudio_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
-<div id="dbplyr-writes-sql-for-you-from-dplyr-code" class="section level1">
+<div id="dbplyr-writes-sql-for-you-from-dplyr-code" class="section level1 tabset tabset-fade tabset-pills">
 <h1><code>dbplyr</code> writes SQL for you from <code>dplyr</code> code</h1>
 <p>We can also use the <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank"><code>dbplyr</code></a> package to automatically create SQL code from your <code>dplyr</code> code.</p>
 <p>Three good tutorials on this method are:</p>
@@ -517,7 +519,7 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. ..@ loadable.extensions: logi TRUE
 ##   .. .. ..@ flags              : int 70
 ##   .. .. ..@ vfs                : chr &quot;&quot;
-##   .. .. ..@ ref                :&lt;environment: 0x000001aba3494428&gt; 
+##   .. .. ..@ ref                :&lt;environment: 0x000000001a60e220&gt; 
 ##   .. .. ..@ bigint             : chr &quot;integer64&quot;
 ##   ..$ disco: NULL
 ##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_SQLiteConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
@@ -537,7 +539,7 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_base_remote&quot; &quot;op_base&quot; &quot;op&quot;
 ##   .. .. .. .. ..$ dots:List of 1
 ##   .. .. .. .. .. ..$ : language ~year &gt;= 2002
-##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001ab9f8ac488&gt; 
+##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e6f3f70&gt; 
 ##   .. .. .. .. ..$ args: list()
 ##   .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. .. .. ..$ dots:List of 2
@@ -548,19 +550,19 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_group_by&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. .. ..$ dots:List of 1
 ##   .. .. .. ..$ sales: language ~sum(sales, na.rm = TRUE)
-##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba3035a48&gt; 
+##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e776f98&gt; 
 ##   .. .. ..$ args: list()
 ##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_summarise&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. ..$ dots:List of 1
 ##   .. .. ..$ : language ~city %IN% c(&quot;Abilene&quot;, &quot;Arlington&quot;, &quot;Kerrville&quot;)
-##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001ab9ee02998&gt; 
+##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e78d4a0&gt; 
 ##   .. ..$ args: list()
 ##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
 ##   ..$ dots:List of 2
 ##   .. ..$ : language ~city
-##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba316f238&gt; 
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
 ##   .. ..$ : language ~year
-##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000001aba316f238&gt; 
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
 ##   ..$ args:List of 1
 ##   .. ..$ .by_group: logi FALSE
 ##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_arrange&quot; &quot;op_single&quot; &quot;op&quot;
@@ -618,16 +620,18 @@ head(texas_df)</code></pre>
 ## 6 Beaumont   2015     7   318</code></pre>
 <p>An alternative is to use a combination of <code>dplyr</code> verbs that <em>will</em> convert to SQL achieve the same result. Or, as below, we write the SQL ourselves for this particular <a href="https://stackoverflow.com/a/34715134/11105756">task</a>. We use a Common Table Expression that is explained further in our guide <a href="https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html">here</a>.</p>
 <pre class="r"><code>query &lt;- DBI::dbSendQuery(con, &quot;
-WITH cte AS (
-   SELECT city,
-          year,
-          month,
-          sales, 
-          row_number() OVER(PARTITION BY city ORDER BY sales DESC) AS rownum
-   FROM   txhousing
-   )
-SELECT  *
-FROM   cte
+WITH cte 
+     AS (SELECT city, 
+                year, 
+                month, 
+                sales, 
+                Row_number() 
+                  OVER( 
+                    partition BY city 
+                    ORDER BY sales DESC) AS rownum 
+         FROM   txhousing) 
+SELECT * 
+FROM   cte 
 WHERE  rownum = 1;&quot;)
 DBI::dbFetch(query, n = 6)</code></pre>
 <pre><code>##        city year month sales rownum

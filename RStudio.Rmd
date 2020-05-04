@@ -39,16 +39,18 @@ Here, using the `DBI` pckage, we send a SQL query to the database ready to be ex
 
 ```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
-                        "SELECT   city,
-                                  year,
-                                  sum(sales) as sales
-                         FROM     txhousing 
-                         WHERE    year >=2002
-                         GROUP BY city,
-                                  year
-                         HAVING city IN ('Abilene','Arlington','Kerrville')
-                         ORDER BY city,
-                                  year;")
+                        "
+SELECT city, 
+       year, 
+       Sum(sales) AS sales 
+FROM   txhousing 
+WHERE  year >= 2002 
+GROUP  BY city, 
+          year 
+HAVING city IN ( 'Abilene', 'Arlington', 'Kerrville' ) 
+ORDER  BY city, 
+          year; 
+")
 ```
 
 Finally, using `DBI::dbFetch()` we execute the SQL and pull the data from the database into a dataframe called `texas_df`.
@@ -70,7 +72,7 @@ texas_df %>%
   ggplot2::geom_line() 
 ```
 
-# `dbplyr` writes SQL for you from `dplyr` code
+# `dbplyr` writes SQL for you from `dplyr` code {.tabset .tabset-fade .tabset-pills}
 
 We can also use the [`dbplyr`](https://dbplyr.tidyverse.org/articles/dbplyr.html){target="_blank"} package to automatically create SQL code from your `dplyr` code. 
 
@@ -199,16 +201,18 @@ An alternative is to use a combination of `dplyr` verbs that *will* convert to S
 
 ```{r}
 query <- DBI::dbSendQuery(con, "
-WITH cte AS (
-   SELECT city,
-          year,
-          month,
-          sales, 
-          row_number() OVER(PARTITION BY city ORDER BY sales DESC) AS rownum
-   FROM   txhousing
-   )
-SELECT  *
-FROM   cte
+WITH cte 
+     AS (SELECT city, 
+                year, 
+                month, 
+                sales, 
+                Row_number() 
+                  OVER( 
+                    partition BY city 
+                    ORDER BY sales DESC) AS rownum 
+         FROM   txhousing) 
+SELECT * 
+FROM   cte 
 WHERE  rownum = 1;")
 DBI::dbFetch(query, n = 6)
 DBI::dbClearResult(query)

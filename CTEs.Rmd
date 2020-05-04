@@ -15,15 +15,22 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-# Why is literate SQL important?
+```{r, echo=FALSE}
+library(dplyr)
+library(magrittr)
+```
 
-SQL can be difficult for others to read if the logic becomes complex. Particularly if you use [nested SQL](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). While nested SQL can create elegant solutions this can make the code harder to read and QA.
+# Why is literate SQL important? {.tabset .tabset-fade .tabset-pills}
 
-Common Table Expressions are a simple way to make your SQL code easier to read, much like a story. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
+SQL can be difficult for others to read and QA if the SQL is [nested](https://www.tutorialspoint.com/sql/sql-sub-queries.htm). Common Table Expressions (CTEs) are a simple way to make your SQL code easier to read, much like a story. This is sometimes called [literate SQL](https://modern-sql.com/use-case/literate-sql){target="_blank"} or [literate programming](https://en.wikipedia.org/wiki/Literate_programming){target="_blank"}.
 
-Below are two demonstrations of CTEs. Please also review this very clear tutorial on [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. It describes CTEs visually by highlighting key parts of the SQL code when using CTEs. Also, try modules 10 to 12 of the Oracle [Subqueries](https://livesql.oracle.com/apex/livesql/file/tutorial_GMLYIBY74FPBS888XO8F1R95I.html){target="_blank"} tutorial. 
+1. Please also review this clear tutorial on [essentialsql.com](https://www.essentialsql.com/introduction-common-table-expressions-ctes/){target="_blank"}. It describes CTEs visually by highlighting key parts of the SQL code when using CTEs. 
 
-# Example use of a Common Table Expression
+2. Also, try modules 10 to 12 of the Oracle [Subqueries](https://livesql.oracle.com/apex/livesql/file/tutorial_GMLYIBY74FPBS888XO8F1R95I.html){target="_blank"} tutorial. 
+
+Below are two demonstrations of CTEs. 
+
+## Example CTE
 
 If you are not an R user (or don't plan to be) you can safely ignore this hidden block of code. It puts demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data into a temporary database. Here are all the rows of that table.
 
@@ -61,19 +68,21 @@ Looking just at the SQL in green text below, note how we have:
 
 ```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
-                        "WITH recent_years AS 
-                        (SELECT   city,
-                                  year,
-                                  sum(sales) as sales
-                         FROM     txhousing 
-                         WHERE    year >=2002
-                         GROUP BY city,
-                                  year)
-                         SELECT *
-                         FROM recent_years
-                         WHERE city IN ('Abilene','Arlington','Kerrville')
-                         ORDER BY city,
-                                  year;")
+                        "
+WITH recent_years 
+     AS (SELECT city, 
+                year, 
+                Sum(sales) AS sales 
+         FROM   txhousing 
+         WHERE  year >= 2002 
+         GROUP  BY city, 
+                   year) 
+SELECT * 
+FROM   recent_years 
+WHERE  city IN ( 'Abilene', 'Arlington', 'Kerrville' ) 
+ORDER  BY city, 
+          year;                         
+                        ")
 ```
 
 ```{r, eval = TRUE, echo=FALSE}
@@ -84,7 +93,7 @@ texas_df %>%
   DT::datatable(caption = "Result of the CTE")
 ```
 
-# Another example
+## Another CTE example
 
 Let's look at another example of a CTE on the same data table. 
 
@@ -94,18 +103,21 @@ Let's look at another example of a CTE on the same data table.
 
 ```{r, eval = TRUE}
 query <- DBI::dbSendQuery(con, 
-                        "WITH top3_change AS 
-                        (SELECT   city,
-                                  (max(median) - min(median))/ min(median) as change
-                         FROM     txhousing
-                         GROUP BY city
-                         ORDER BY change desc
-                         LIMIT 3)
-                         SELECT a.*,
-                         b.change
-                         FROM txhousing AS a
-                         INNER JOIN top3_change AS b
-                         ON a.city = b.city;")
+                        "
+WITH top3_change AS 
+( 
+         SELECT   city, 
+                  (Max(median) - Min(median))/ Min(median) AS change 
+         FROM     txhousing 
+         GROUP BY city 
+         ORDER BY change DESC limit 3) 
+SELECT     a.*, 
+           b.change 
+FROM       txhousing   AS a 
+INNER JOIN top3_change AS b 
+ON         a.city = b.city;
+
+                        ")
 ```
 
 Here is the result of that SQL query.
