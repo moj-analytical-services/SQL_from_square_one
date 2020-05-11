@@ -1,0 +1,219 @@
+---
+title: "Run SQL from RStudio"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: false
+---
+
+<br />
+<br />
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your heaviest data wrangling from R code to SQL you can use the greater speeed of the database while still staying in RStudio with all your code in one place.
+
+To connect RStudio to Oracle use the new [oracleConnectR R package](https://github.com/moj-analytical-services/oracleConnectR){target="_blank"}. To connect all other database types to RStudio, follow the [RStudio connect to a database](https://db.rstudio.com/getting-started/connect-to-database){target="_blank"} guidance.
+
+# Write SQL in RStudio and execute in the database
+
+To demonstrate how to run SQL on your database from RStudio, we first create a temporary in-memory database using the [RSQLite package](https://rsqlite.r-dbi.org/){target="_blank"}. We then write the demonstration [Texas Housing Sales](https://ggplot2.tidyverse.org/reference/txhousing.html){target="_blank"} data from the ggplot package into that temproary database.
+
+```{r, eval = TRUE}
+library(tidyverse)
+library(RSQLite)
+library(DBI)
+
+# Create an ephemeral in-memory RSQLite database
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+
+DBI::dbWriteTable(con, "txhousing", 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)
+```
+
+Here, using the `DBI` pckage, we send a SQL query to the database ready to be executed.
+
+```{r, eval = TRUE}
+query <- DBI::dbSendQuery(con, 
+                        "
+SELECT city, 
+       year, 
+       Sum(sales) AS sales 
+FROM   txhousing 
+WHERE  year >= 2002 
+GROUP  BY city, 
+          year 
+HAVING city IN ( 'Abilene', 'Arlington', 'Kerrville' ) 
+ORDER  BY city, 
+          year; 
+")
+```
+
+Finally, using `DBI::dbFetch()` we execute the SQL and pull the data from the database into a dataframe called `texas_df`.
+
+```{r, eval = TRUE}
+texas_df <- DBI::dbFetch(query)
+DBI::dbClearResult(query)
+head(texas_df)
+```
+
+We can now use the data frame `texas_df`, such as in this quick plot.
+
+```{r, eval = TRUE}
+texas_df %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() 
+```
+
+# `dbplyr` writes SQL for you from `dplyr` code {.tabset .tabset-fade .tabset-pills}
+
+We can also use the [`dbplyr`](https://dbplyr.tidyverse.org/articles/dbplyr.html){target="_blank"} package to automatically create SQL code from your `dplyr` code. 
+
+Three good tutorials on this method are:
+
+1. [data carpentry](https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html){target="_blank"}.
+2. A [Computing for the social sciences](https://cfss.uchicago.edu/notes/sql-databases/){target="_blank"} course.
+3. RStudio's [Databases using dplyr](https://db.rstudio.com/dplyr/){target="_blank"}.
+
+## Why use `dbplyr`?
+
+But why is this useful? It may be that **"You have so much data that it does not all fit into memory simultaneously and you need to use some external storage engine"**. 
+
+You may also find that using the database leads to dramatic speed-up of your data wrangling if you [benchmark](https://www.alexejgossmann.com/benchmarking_r/){target="_blank"} between the two methods.
+A faster method will likely scale better if future applications of your work tackle greater data volumes. 
+
+## How to use `dbplyr`
+
+Again, we set up a temporary database and write a table to it.
+
+```{r, eval = TRUE}
+con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
+
+DBI::dbWriteTable(con, "txhousing", 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)
+```
+
+To use the functionality of `dbplyr` we use `dplyr::tbl()`. This tells `dplyr` that this table is in a database that we have set up a connection for (called `con`).
+
+```{r tble_code, eval = TRUE}
+library(dbplyr)
+tble <- dplyr::tbl(con, "txhousing")
+```
+
+Now, when we use that table in ordinary `dplyr` code like this, `dplyr` knows it is a database table and `dbplyr` will translate it into SQL automatically in the background.
+
+```{r, eval = TRUE}
+texas <- 
+  tble %>% 
+  dplyr::filter(year >= 2002) %>% 
+  dplyr::group_by(city,year) %>% 
+  dplyr::summarise(sales = sum(sales, na.rm = TRUE)) %>% 
+  dplyr::filter(city %IN% c('Abilene','Arlington','Kerrville')) 
+```
+
+## What is `dbplyr` doing for us?
+
+Because `dbplyr` is "lazy", the R object we have created (`texas`) has not pulled the data or executed the SQL in the database. 
+
+> "When working with databases, dplyr tries to be as lazy as possible: It never pulls data into R unless you explicitly ask for it. It delays doing any work until the last possible moment: it collects together everything you want to do and then sends it to the database in one step." 
+From [Introduction to dbplyr](https://dbplyr.tidyverse.org/articles/dbplyr.html){target="_blank"}.
+
+This means We can carry on adding `dplyr` logic. For example, below we add on a sort by `city` and `year` using `dplyr::arrange()`. This simply adds to the SQL logic stored in `texas`.
+
+```{r}
+texas <- texas %>% 
+  dplyr::arrange(city,year) 
+```
+
+We can also view the SQL `dbplyr` has automatically created for us from the `dplyr` code by piping `texas` into the function `dplyr::collect()`.
+
+```{r, eval = TRUE}
+texas %>% dplyr::show_query()
+```
+
+Notice how ugly this SQL is compared to the SQL we wrote in the first section above. It creates the same result, but automatically created SQL from `dbplyr` is usually difficult to read. For this reason, we would only QA the `dplyr` code that created the SQL. It would also not be a good idea to re-use the automatically generated SQL elsewhere.
+
+If we need to understand or de-bug our chained `dplyr` steps, we can use the `dplyr::glimpse()` or `utils::head()` to quickly preview the top few rows for parts of our logic.
+
+```{r}
+tble %>% 
+  dplyr::filter(year >= 2002) %>% utils::head()
+```
+
+The R object `texas` that `dbplyr` has created is a nested list of instructions. We can inspect what's inside from the Environment pane, or by using `utils::str()`.
+
+```{r}
+utils::str(texas)
+```
+
+## Execute the SQL `dbplyr` has created for us
+
+Finally, when we want to use the R object `texas` such as in a plot, `dbplyr` realises we need the data inside R to create it. The SQL is executed on the database and the data is pulled into RStudio. Note this plot is the same plot as from the previous method above where we wrote our own SQL.
+
+```{r, eval = TRUE}
+texas %>% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() 
+```
+
+We could also tell `dbplyr` to execute the SQL and pull the data into an R dataframe using `dplyr::collect()`. For example, to carry out further data manipulation within RStudio.
+
+```{r, eval = TRUE}
+texas_df  <- dplyr::collect(texas) 
+
+head(texas_df)
+```
+
+## What if a `dplyr` verb won't convert to SQL?
+
+Some `dplyr` verbs have no direct equivalent in SQL and will return an error. For example, below we try to use `dplyr::slice()` to select the highest number of sales for each city in any month. This returns an error when run on the `tble` that is a table in our database.
+
+```{r, error=TRUE}
+tble %>% 
+  dplyr::group_by(city) %>% 
+  dplyr::arrange(desc(sales)) %>% 
+  dplyr::slice(1)
+```
+
+`dplyr::slice()` will only work if we bring the data into R using `dplyr::collect()` as shown below. However, we have had to pull all of our data into R. If this is a very large table this may not fit into R, or it could greatly slow down our data wrangling.
+
+```{r}
+tble %>% 
+  dplyr::collect() %>% 
+  dplyr::group_by(city) %>% 
+  dplyr::arrange(desc(sales)) %>% 
+  dplyr::slice(1) %>% 
+  dplyr::select(city,year,month,sales) %>% head()
+```
+
+An alternative is to use a combination of `dplyr` verbs that *will* convert to SQL achieve the same result. Or, as below, we write the SQL ourselves for this particular [task](https://stackoverflow.com/a/34715134/11105756). We use a Common Table Expression that is explained further in our guide [here](https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html).
+
+```{r}
+query <- DBI::dbSendQuery(con, "
+WITH cte 
+     AS (SELECT city, 
+                year, 
+                month, 
+                sales, 
+                Row_number() 
+                  OVER( 
+                    partition BY city 
+                    ORDER BY sales DESC) AS rownum 
+         FROM   txhousing) 
+SELECT * 
+FROM   cte 
+WHERE  rownum = 1;")
+DBI::dbFetch(query, n = 6)
+DBI::dbClearResult(query)
+```

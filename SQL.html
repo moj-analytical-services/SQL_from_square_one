@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Structured Query Language (SQL) Fundamentals</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h2 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h3 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h4 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h5 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h6 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SQL from square one</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="SQL.html">
+    <span class="fa fa-key"></span>
+     
+    Learn SQL fundamentals
+  </a>
+</li>
+<li>
+  <a href="CTEs.html">
+    <span class="fa fa-book-open"></span>
+     
+    Literate SQL (CTEs)
+  </a>
+</li>
+<li>
+  <a href="RStudio.html">
+    <span class="fa fa-laptop"></span>
+     
+    Run SQL from RStudio
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/moj-analytical-services/SQL_from_square_one/tree/gh-pages">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Structured Query Language (SQL) Fundamentals</h1>
+
+</div>
+
+
+<p><img src="images/SQL3.png" width="50%" /></p>
+<ul>
+<li>Image from <a href="https://www.listendata.com/2014/04/proc-sql-select-statement.html" target="_blank">listendata.com</a>.</li>
+</ul>
+<div id="main-sql-commands" class="section level1 tabset tabset-fade tabset-pills">
+<h1>Main SQL Commands</h1>
+<div id="select" class="section level2">
+<h2><code>SELECT</code></h2>
+<p>The most fundamental SQL skill is to <code>SELECT</code> one or more columns. You simply list the columns you need after the <code>SELECT</code>, or put an * to select all of the columns.</p>
+<ol style="list-style-type: decimal">
+<li><p><code>SELECT</code> is well covered in the first chapter of the DataCamp course <a href="https://www.datacamp.com/courses/introduction-to-sql" target="_blank">Introduction to SQL</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_select.asp" target="_blank">w3schools SELECT tutorial</a>.</p></li>
+</ol>
+</div>
+<div id="from" class="section level2">
+<h2><code>FROM</code></h2>
+<p><code>FROM</code> tells SQL which data to query and lets you <code>JOIN</code>. There isn’t really a training course on how to use <code>FROM</code> for one table. Just put the table name after the <code>FROM</code> command. When you want to join tables the <code>FROM</code> command gets more complex by adding joins. A popular way to explain the different kinds of SQL joins is with Venn diagrams like these from the <a href="https://www.w3schools.com/sql/sql_join.asp" target="_blank">w3schools SQL joins Tutorial</a>.</p>
+<p><img src="images/joins.png" width="100%" /></p>
+<details>
+<summary>Note some people reject the Venn diagram explanation for joins</summary>
+<ul>
+<p>Some reccomend you <a href="https://blog.jooq.org/2016/07/05/say-no-to-venn-diagrams-when-explaining-joins/" target="_blank">“Say NO to Venn Diagrams When Explaining Joins”</a>. Instead, all joins begin with a <code>CROSS JOIN</code> (where every row on the left table is combined with every row on the right table), then all other joins (e.g. <code>INNER JOIN</code>) are a filtered version of that <code>CROSS JOIN</code>. A cross join is also known as the <a href="https://en.wikipedia.org/wiki/Cartesian_product">Caretsian product</a> of the two tables.</p>
+<p><img src="https://www.essentialsql.com/wp-content/uploads/2016/08/Cross-Join-Two-Tables-to-Get-Combinations.png" style="width:60.0%" /> * Image from <a href="https://www.essentialsql.com/cross-join-introduction/" target="&quot;_blank">Essential SQL</a>.</p>
+<p>Though please note that cross joins are, <em>“..potentially an expensive and dangerous operation since it can lead to a large data explosion. It is best used in scenarios where a normal join cannot be used and very selective predicates are being used in the WHERE clause to limit the number of produced rows”</em> <a href="https://docs.microsoft.com/en-us/u-sql/statements-and-expressions/select/from/joins/cross-join">Microsoft Docs</a>. In other words, if you do use a cross join, make sure it is filtered with a <code>WHERE</code> clause.</p>
+</ul>
+</details>
+<ol style="list-style-type: decimal">
+<li><p>Joins are covered in the Oracle Tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_G00HFQ7L5MB5BJ2K9612EDNWB.html" target="_blank">Joining Tables</a>.</p></li>
+<li><p>And chapters 1 and 2 of the Datacamp course <a href="https://learn.datacamp.com/courses/joining-data-in-postgresql" target="_blank">Joining Data in SQL</a>. While this course is for the Postrgres flavour of SQL, you will find the methods will work in most flavours (e.g. Oracle or Microsoft SQL Server).</p></li>
+</ol>
+</div>
+<div id="where-optional" class="section level2">
+<h2><code>WHERE</code> (optional)</h2>
+<p><code>WHERE</code> filters rows.</p>
+<ol style="list-style-type: decimal">
+<li><p>The Oracle tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_FIYST7OOFBN2ESHA54YUV6WN8.html" target="_blank">Querying and Filtering Rows</a> shows you how to use <code>WHERE</code> to filter rows.</p></li>
+<li><p>Also, see chapter 2 of the DataCamp course <a href="https://www.datacamp.com/courses/introduction-to-sql" target="_blank">Introduction to SQL</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_where.asp">w3schools WHERE tutorial</a>.</p></li>
+</ol>
+</div>
+<div id="group-by-optional" class="section level2">
+<h2><code>GROUP BY</code> (optional)</h2>
+<p>After you have used <code>SELECT</code> to choose the columns you need <code>FROM</code> one or more tables, then filtered rows with <code>WHERE</code>, a common further <em>optional</em> command is to use <code>GROUP BY</code>. This will aggregate (e.g. sum up) values in one or more columns, by the values within another column (or columns). For example, to sum sales values by the values in a date column.</p>
+<ol style="list-style-type: decimal">
+<li><p>The oracle Tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_G1UNQOOO9YNU723ZMVP6EGJIO.html" target="_blank">Aggregating Rows</a> describes how to both aggregate rows and use <code>DISTINCT</code> to find unique values.</p></li>
+<li><p>In DataCamp, use chapter 3 of<a href="https://www.datacamp.com/courses/introduction-to-sql" target="_blank">Introduction to SQL</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_groupby.asp" target="_blank">w3schools GROUP BY tutorial</a>.</p></li>
+</ol>
+</div>
+<div id="having-optional" class="section level2">
+<h2><code>HAVING</code> (optional)</h2>
+<p><code>HAVING</code> is an <em>optional</em> command to filter aggregated data from a <code>GROUP BY</code> command. Think of it as a version of <code>WHERE</code> created only to filter the result of the <code>GROUP BY</code> command.</p>
+<ol style="list-style-type: decimal">
+<li>See the <a href="https://www.w3schools.com/sql/sql_having.asp" target="_blank">w3schools HAVING tutorial</a>.</li>
+</ol>
+</div>
+<div id="order-by-optional" class="section level2">
+<h2><code>ORDER BY</code> (optional)</h2>
+<p><code>ORDER BY</code> sorts rows by one or more columns. Your data often needs to be sorted so that it is ready to present to a client when exported, for example.</p>
+<ol style="list-style-type: decimal">
+<li><p>Oracle order by methods are covered well in <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_GMY4RMH9LDCPYKJC615PEOZHT.html" target="_blank">Sorting and Limiting Rows</a>.</p></li>
+<li><p>See the final chapter 4 of DataCamp’s <a href="https://www.datacamp.com/courses/introduction-to-sql" target="_blank">Introduction to SQL</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_orderby.asp" target="_blank">w3schools ORDER BY tutorial</a>.</p></li>
+</ol>
+</div>
+</div>
+<div id="next-most-useful-sql-commands" class="section level1 tabset tabset-fade tabset-pills">
+<h1>Next most useful SQL commands</h1>
+<div id="union-all" class="section level2">
+<h2><code>UNION ALL</code></h2>
+<p>Joins in SQL combine columns from two or more tables. However, instead, you want to stack two tables on top of each other where both tables have the same columns. Appending two tables is through <code>UNION ALL</code>, while <code>UNION</code> will remove any duplicate rows it finds. In other words, joins combine the columns of tables, usually matching on values in one or more columns, while union appends rows with the same columns. The image below shows a join:  </p>
+<p><img src="https://www.essentialsql.com/wp-content/uploads/2015/08/VisualDepictionOfJoin.png" style="width:60.0%" /> <br /> <br /></p>
+<p>While this image shows a <code>UNION ALL</code>:</p>
+<p><br /> <br /></p>
+<p><img src="https://www.essentialsql.com/wp-content/uploads/2015/08/VisualDepictionOfUnion.png" style="width:60.0%" /></p>
+<ul>
+<li>Images from: <a href="https://www.essentialsql.com/what-is-the-difference-between-a-join-and-a-union/" target="_blank">essentialsql.com</a>.</li>
+</ul>
+<ol style="list-style-type: decimal">
+<li><p>Try the Oracle tutorial <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_GPSAXIY7KMDX4ALZX654OXY6S.html" target="_blank">Union, Minus and Intersect</a>.</p></li>
+<li><p>Chapter 3 of the Datacamp course <a href="https://learn.datacamp.com/courses/joining-data-in-postgresql" target="_blank">Joining Data in SQL</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_union.asp" target="_blank">w3schools UNION tutorial</a>.</p></li>
+</ol>
+</div>
+<div id="case-when" class="section level2">
+<h2><code>CASE WHEN</code></h2>
+<p><code>CASE WHEN</code> is SQL’s if-then-else logic for creating new columns. For example, to group the age of people into bands. The method is simple to understand and de-bug if you lay out your logic in a clear format similar to the <a href="https://www.w3schools.com/sql/sql_ref_case.asp" target="_blank">w3schools CASE example</a> below.</p>
+<pre class="r"><code>#https://wch.github.io/webshot/articles/intro.html
+library(webshot)
+library(magick)</code></pre>
+<pre><code>## Warning: package &#39;magick&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Linking to ImageMagick 6.9.9.14
+## Enabled features: cairo, freetype, fftw, ghostscript, lcms, pango, rsvg, webp
+## Disabled features: fontconfig, x11</code></pre>
+<pre class="r"><code>URL &lt;- &quot;https://www.w3schools.com/sql/sql_ref_case.asp&quot;
+
+# Using CSS selectors to pick out regions
+webshot::webshot(URL, selector = &quot;#main &gt; div:nth-child(8) &gt; div&quot;)</code></pre>
+<p><img src="SQL_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code># Did this by using developer tools, select an element to inspect, then copy selector</code></pre>
+</div>
+<div id="handling-nulls" class="section level2">
+<h2>Handling nulls</h2>
+<p>Null values can cause problems in every data tool if you don’t check for the prresence and handle them appropriately when aggregating. There are specific methods depending on the <a href="https://www.quora.com/Why-are-there-so-many-types-of-SQL-What-is-the-difference-between-all-of-them" target="_blank">type of SQL</a> you are using.</p>
+<ol style="list-style-type: decimal">
+<li><p>Here is the Oracle course on <a href="https://livesql.oracle.com/apex/livesql/file/tutorial_GIEX74ES22UVSEOB0CL100ZL1.html" target="_blank">Querying Null-valued Rows</a>.</p></li>
+<li><p>And the <a href="https://www.w3schools.com/sql/sql_isnull.asp" target="_blank">w3schools NULL Functions tutorial</a>.</p></li>
+</ol>
+</div>
+</div>
+<div id="going-further-with-sql" class="section level1 tabset tabset-fade tabset-pills">
+<h1>Going further with SQL</h1>
+<div id="sql-formats" class="section level2">
+<h2>SQL Formats</h2>
+<p>Make your SQL code easy to read and de-bug with good foramtting. <a href="https://dzone.com/articles/24-rules-to-the-sql-formatting-standard" target="_blank">How to Properly Format SQL Code</a> containes useful tips. Or, if your code does <strong>not</strong> contain sensitive information, use a <a href="http://www.dpriver.com/pp/sqlformat.htm" target="_blank">SQL formating website</a>.</p>
+</div>
+<div id="sql-cheat-sheets" class="section level2">
+<h2>SQL Cheat sheets</h2>
+<p>Cheat sheets are a good way to quickly remind you of what you have forgotten. There are many online. The <a href="https://www.kdnuggets.com/2018/07/sql-cheat-sheet.html" target="_blank">KDnuggets cheatsheet</a> lists SQL commands and methods along with good plain English explanations of what each one does.</p>
+</div>
+<div id="what-should-i-learn-next-in-sql" class="section level2">
+<h2>What should I learn next in SQL?</h2>
+<p>We encourage you to write literate SQL using Common Table Expressions (CTEs). And, if you are an RStudio user, consdier running SQL from RStudio itself. The next two pages in this guide cover <a href="https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html">CTEs</a> and using <a href="https://moj-analytical-services.github.io/SQL_from_square_one/RStudio.html">RStudio with SQL</a>.</p>
+</div>
+</div>
+
+<footer role="contentinfo" id="site-footer">
+
+<!-- /.bottom-menu -->
+	<p class="copyright">&#169; 2020,
+		powered by <a href="http://www.r-project.org">R</a> + <a href="http://rmarkdown.rstudio.com">RMarkdown</a> + <a href="http://github.com">Github</a>.</p>
+</footer>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Run SQL from RStudio</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h2 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h3 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h4 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h5 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.section h6 {
+  padding-top: 50px;
+  margin-top: -50px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SQL from square one</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="SQL.html">
+    <span class="fa fa-key"></span>
+     
+    Learn SQL fundamentals
+  </a>
+</li>
+<li>
+  <a href="CTEs.html">
+    <span class="fa fa-book-open"></span>
+     
+    Literate SQL (CTEs)
+  </a>
+</li>
+<li>
+  <a href="RStudio.html">
+    <span class="fa fa-laptop"></span>
+     
+    Run SQL from RStudio
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/moj-analytical-services/SQL_from_square_one/tree/gh-pages">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Run SQL from RStudio</h1>
+
+</div>
+
+
+<p><br /> <br /></p>
+<p>If you are an R user, consider running SQL on your database directly from RStudio. By moving some of your heaviest data wrangling from R code to SQL you can use the greater speeed of the database while still staying in RStudio with all your code in one place.</p>
+<p>To connect RStudio to Oracle use the new <a href="https://github.com/moj-analytical-services/oracleConnectR" target="_blank">oracleConnectR R package</a>. To connect all other database types to RStudio, follow the <a href="https://db.rstudio.com/getting-started/connect-to-database" target="_blank">RStudio connect to a database</a> guidance.</p>
+<div id="write-sql-in-rstudio-and-execute-in-the-database" class="section level1">
+<h1>Write SQL in RStudio and execute in the database</h1>
+<p>To demonstrate how to run SQL on your database from RStudio, we first create a temporary in-memory database using the <a href="https://rsqlite.r-dbi.org/" target="_blank">RSQLite package</a>. We then write the demonstration <a href="https://ggplot2.tidyverse.org/reference/txhousing.html" target="_blank">Texas Housing Sales</a> data from the ggplot package into that temproary database.</p>
+<pre class="r"><code>library(tidyverse)
+library(RSQLite)
+library(DBI)
+
+# Create an ephemeral in-memory RSQLite database
+con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
+
+DBI::dbWriteTable(con, &quot;txhousing&quot;, 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)</code></pre>
+<p>Here, using the <code>DBI</code> pckage, we send a SQL query to the database ready to be executed.</p>
+<pre class="r"><code>query &lt;- DBI::dbSendQuery(con, 
+                        &quot;
+SELECT city, 
+       year, 
+       Sum(sales) AS sales 
+FROM   txhousing 
+WHERE  year &gt;= 2002 
+GROUP  BY city, 
+          year 
+HAVING city IN ( &#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39; ) 
+ORDER  BY city, 
+          year; 
+&quot;)</code></pre>
+<p>Finally, using <code>DBI::dbFetch()</code> we execute the SQL and pull the data from the database into a dataframe called <code>texas_df</code>.</p>
+<pre class="r"><code>texas_df &lt;- DBI::dbFetch(query)
+DBI::dbClearResult(query)
+head(texas_df)</code></pre>
+<pre><code>##      city year sales
+## 1 Abilene 2002  1516
+## 2 Abilene 2003  1632
+## 3 Abilene 2004  1830
+## 4 Abilene 2005  1977
+## 5 Abilene 2006  1997
+## 6 Abilene 2007  2003</code></pre>
+<p>We can now use the data frame <code>texas_df</code>, such as in this quick plot.</p>
+<pre class="r"><code>texas_df %&gt;% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() </code></pre>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="dbplyr-writes-sql-for-you-from-dplyr-code" class="section level1 tabset tabset-fade tabset-pills">
+<h1><code>dbplyr</code> writes SQL for you from <code>dplyr</code> code</h1>
+<p>We can also use the <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank"><code>dbplyr</code></a> package to automatically create SQL code from your <code>dplyr</code> code.</p>
+<p>Three good tutorials on this method are:</p>
+<ol style="list-style-type: decimal">
+<li><a href="https://datacarpentry.org/R-ecology-lesson/05-r-and-databases.html" target="_blank">data carpentry</a>.</li>
+<li>A <a href="https://cfss.uchicago.edu/notes/sql-databases/" target="_blank">Computing for the social sciences</a> course.</li>
+<li>RStudio’s <a href="https://db.rstudio.com/dplyr/" target="_blank">Databases using dplyr</a>.</li>
+</ol>
+<div id="why-use-dbplyr" class="section level2">
+<h2>Why use <code>dbplyr</code>?</h2>
+<p>But why is this useful? It may be that <strong>“You have so much data that it does not all fit into memory simultaneously and you need to use some external storage engine”</strong>.</p>
+<p>You may also find that using the database leads to dramatic speed-up of your data wrangling if you <a href="https://www.alexejgossmann.com/benchmarking_r/" target="_blank">benchmark</a> between the two methods. A faster method will likely scale better if future applications of your work tackle greater data volumes.</p>
+</div>
+<div id="how-to-use-dbplyr" class="section level2">
+<h2>How to use <code>dbplyr</code></h2>
+<p>Again, we set up a temporary database and write a table to it.</p>
+<pre class="r"><code>con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
+
+DBI::dbWriteTable(con, &quot;txhousing&quot;, 
+                  ggplot2::txhousing,
+                  overwrite = TRUE)</code></pre>
+<p>To use the functionality of <code>dbplyr</code> we use <code>dplyr::tbl()</code>. This tells <code>dplyr</code> that this table is in a database that we have set up a connection for (called <code>con</code>).</p>
+<pre class="r"><code>library(dbplyr)
+tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
+<p>Now, when we use that table in ordinary <code>dplyr</code> code like this, <code>dplyr</code> knows it is a database table and <code>dbplyr</code> will translate it into SQL automatically in the background.</p>
+<pre class="r"><code>texas &lt;- 
+  tble %&gt;% 
+  dplyr::filter(year &gt;= 2002) %&gt;% 
+  dplyr::group_by(city,year) %&gt;% 
+  dplyr::summarise(sales = sum(sales, na.rm = TRUE)) %&gt;% 
+  dplyr::filter(city %IN% c(&#39;Abilene&#39;,&#39;Arlington&#39;,&#39;Kerrville&#39;)) </code></pre>
+</div>
+<div id="what-is-dbplyr-doing-for-us" class="section level2">
+<h2>What is <code>dbplyr</code> doing for us?</h2>
+<p>Because <code>dbplyr</code> is “lazy”, the R object we have created (<code>texas</code>) has not pulled the data or executed the SQL in the database.</p>
+<blockquote>
+<p>“When working with databases, dplyr tries to be as lazy as possible: It never pulls data into R unless you explicitly ask for it. It delays doing any work until the last possible moment: it collects together everything you want to do and then sends it to the database in one step.” From <a href="https://dbplyr.tidyverse.org/articles/dbplyr.html" target="_blank">Introduction to dbplyr</a>.</p>
+</blockquote>
+<p>This means We can carry on adding <code>dplyr</code> logic. For example, below we add on a sort by <code>city</code> and <code>year</code> using <code>dplyr::arrange()</code>. This simply adds to the SQL logic stored in <code>texas</code>.</p>
+<pre class="r"><code>texas &lt;- texas %&gt;% 
+  dplyr::arrange(city,year) </code></pre>
+<p>We can also view the SQL <code>dbplyr</code> has automatically created for us from the <code>dplyr</code> code by piping <code>texas</code> into the function <code>dplyr::collect()</code>.</p>
+<pre class="r"><code>texas %&gt;% dplyr::show_query()</code></pre>
+<pre><code>## &lt;SQL&gt;
+## SELECT *
+## FROM (SELECT `city`, `year`, SUM(`sales`) AS `sales`
+## FROM (SELECT *
+## FROM `txhousing`
+## WHERE (`year` &gt;= 2002.0))
+## GROUP BY `city`, `year`)
+## WHERE (`city` IN (&#39;Abilene&#39;, &#39;Arlington&#39;, &#39;Kerrville&#39;))
+## ORDER BY `city`, `year`</code></pre>
+<p>Notice how ugly this SQL is compared to the SQL we wrote in the first section above. It creates the same result, but automatically created SQL from <code>dbplyr</code> is usually difficult to read. For this reason, we would only QA the <code>dplyr</code> code that created the SQL. It would also not be a good idea to re-use the automatically generated SQL elsewhere.</p>
+<p>If we need to understand or de-bug our chained <code>dplyr</code> steps, we can use the <code>dplyr::glimpse()</code> or <code>utils::head()</code> to quickly preview the top few rows for parts of our logic.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::filter(year &gt;= 2002) %&gt;% utils::head()</code></pre>
+<pre><code>## # Source:   lazy query [?? x 9]
+## # Database: sqlite 3.30.1 [:memory:]
+##   city     year month sales   volume median listings inventory  date
+##   &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 Abilene  2002     1    94  6530000  64000      652       5.4 2002 
+## 2 Abilene  2002     2    94  6860000  62900      746       6.3 2002.
+## 3 Abilene  2002     3   107  8385000  62100      774       6.5 2002.
+## 4 Abilene  2002     4   135 10465000  66900      767       6.3 2002.
+## 5 Abilene  2002     5   154 11465000  69200      778       6.4 2002.
+## 6 Abilene  2002     6   136 11600000  76700      758       6.3 2002.</code></pre>
+<p>The R object <code>texas</code> that <code>dbplyr</code> has created is a nested list of instructions. We can inspect what’s inside from the Environment pane, or by using <code>utils::str()</code>.</p>
+<pre class="r"><code>utils::str(texas)</code></pre>
+<pre><code>## List of 2
+##  $ src:List of 2
+##   ..$ con  :Formal class &#39;SQLiteConnection&#39; [package &quot;RSQLite&quot;] with 7 slots
+##   .. .. ..@ ptr                :&lt;externalptr&gt; 
+##   .. .. ..@ dbname             : chr &quot;:memory:&quot;
+##   .. .. ..@ loadable.extensions: logi TRUE
+##   .. .. ..@ flags              : int 70
+##   .. .. ..@ vfs                : chr &quot;&quot;
+##   .. .. ..@ ref                :&lt;environment: 0x000000001a60e220&gt; 
+##   .. .. ..@ bigint             : chr &quot;integer64&quot;
+##   ..$ disco: NULL
+##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_SQLiteConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
+##  $ ops:List of 4
+##   ..$ name: chr &quot;arrange&quot;
+##   ..$ x   :List of 4
+##   .. ..$ name: chr &quot;filter&quot;
+##   .. ..$ x   :List of 4
+##   .. .. ..$ name: chr &quot;summarise&quot;
+##   .. .. ..$ x   :List of 4
+##   .. .. .. ..$ name: chr &quot;group_by&quot;
+##   .. .. .. ..$ x   :List of 4
+##   .. .. .. .. ..$ name: chr &quot;filter&quot;
+##   .. .. .. .. ..$ x   :List of 2
+##   .. .. .. .. .. ..$ x   : &#39;ident&#39; chr &quot;txhousing&quot;
+##   .. .. .. .. .. ..$ vars: chr [1:9] &quot;city&quot; &quot;year&quot; &quot;month&quot; &quot;sales&quot; ...
+##   .. .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_base_remote&quot; &quot;op_base&quot; &quot;op&quot;
+##   .. .. .. .. ..$ dots:List of 1
+##   .. .. .. .. .. ..$ : language ~year &gt;= 2002
+##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e6f3f70&gt; 
+##   .. .. .. .. ..$ args: list()
+##   .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. .. .. ..$ dots:List of 2
+##   .. .. .. .. ..$ city: symbol city
+##   .. .. .. .. ..$ year: symbol year
+##   .. .. .. ..$ args:List of 1
+##   .. .. .. .. ..$ add: logi FALSE
+##   .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_group_by&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. .. ..$ dots:List of 1
+##   .. .. .. ..$ sales: language ~sum(sales, na.rm = TRUE)
+##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e776f98&gt; 
+##   .. .. ..$ args: list()
+##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_summarise&quot; &quot;op_single&quot; &quot;op&quot;
+##   .. ..$ dots:List of 1
+##   .. .. ..$ : language ~city %IN% c(&quot;Abilene&quot;, &quot;Arlington&quot;, &quot;Kerrville&quot;)
+##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e78d4a0&gt; 
+##   .. ..$ args: list()
+##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
+##   ..$ dots:List of 2
+##   .. ..$ : language ~city
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
+##   .. ..$ : language ~year
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
+##   ..$ args:List of 1
+##   .. ..$ .by_group: logi FALSE
+##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_arrange&quot; &quot;op_single&quot; &quot;op&quot;
+##  - attr(*, &quot;class&quot;)= chr [1:5] &quot;tbl_SQLiteConnection&quot; &quot;tbl_dbi&quot; &quot;tbl_sql&quot; &quot;tbl_lazy&quot; ...</code></pre>
+</div>
+<div id="execute-the-sql-dbplyr-has-created-for-us" class="section level2">
+<h2>Execute the SQL <code>dbplyr</code> has created for us</h2>
+<p>Finally, when we want to use the R object <code>texas</code> such as in a plot, <code>dbplyr</code> realises we need the data inside R to create it. The SQL is executed on the database and the data is pulled into RStudio. Note this plot is the same plot as from the previous method above where we wrote our own SQL.</p>
+<pre class="r"><code>texas %&gt;% 
+  ggplot2::ggplot() +
+  ggplot2::aes(x = year,
+               y = sales,
+               colour = city) +
+  ggplot2::geom_line() </code></pre>
+<p><img src="RStudio_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>We could also tell <code>dbplyr</code> to execute the SQL and pull the data into an R dataframe using <code>dplyr::collect()</code>. For example, to carry out further data manipulation within RStudio.</p>
+<pre class="r"><code>texas_df  &lt;- dplyr::collect(texas) 
+
+head(texas_df)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+## # Groups:   city [1]
+##   city     year sales
+##   &lt;chr&gt;   &lt;int&gt; &lt;dbl&gt;
+## 1 Abilene  2002  1516
+## 2 Abilene  2003  1632
+## 3 Abilene  2004  1830
+## 4 Abilene  2005  1977
+## 5 Abilene  2006  1997
+## 6 Abilene  2007  2003</code></pre>
+</div>
+<div id="what-if-a-dplyr-verb-wont-convert-to-sql" class="section level2">
+<h2>What if a <code>dplyr</code> verb won’t convert to SQL?</h2>
+<p>Some <code>dplyr</code> verbs have no direct equivalent in SQL and will return an error. For example, below we try to use <code>dplyr::slice()</code> to select the highest number of sales for each city in any month. This returns an error when run on the <code>tble</code> that is a table in our database.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::group_by(city) %&gt;% 
+  dplyr::arrange(desc(sales)) %&gt;% 
+  dplyr::slice(1)</code></pre>
+<pre><code>## Error in UseMethod(&quot;slice_&quot;): no applicable method for &#39;slice_&#39; applied to an object of class &quot;c(&#39;tbl_SQLiteConnection&#39;, &#39;tbl_dbi&#39;, &#39;tbl_sql&#39;, &#39;tbl_lazy&#39;, &#39;tbl&#39;)&quot;</code></pre>
+<p><code>dplyr::slice()</code> will only work if we bring the data into R using <code>dplyr::collect()</code> as shown below. However, we have had to pull all of our data into R. If this is a very large table this may not fit into R, or it could greatly slow down our data wrangling.</p>
+<pre class="r"><code>tble %&gt;% 
+  dplyr::collect() %&gt;% 
+  dplyr::group_by(city) %&gt;% 
+  dplyr::arrange(desc(sales)) %&gt;% 
+  dplyr::slice(1) %&gt;% 
+  dplyr::select(city,year,month,sales) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 4
+## # Groups:   city [6]
+##   city       year month sales
+##   &lt;chr&gt;     &lt;int&gt; &lt;int&gt; &lt;dbl&gt;
+## 1 Abilene    2015     7   268
+## 2 Amarillo   2011     8   390
+## 3 Arlington  2006     6   720
+## 4 Austin     2015     7  3466
+## 5 Bay Area   2015     7   849
+## 6 Beaumont   2015     7   318</code></pre>
+<p>An alternative is to use a combination of <code>dplyr</code> verbs that <em>will</em> convert to SQL achieve the same result. Or, as below, we write the SQL ourselves for this particular <a href="https://stackoverflow.com/a/34715134/11105756">task</a>. We use a Common Table Expression that is explained further in our guide <a href="https://moj-analytical-services.github.io/SQL_from_square_one/CTEs.html">here</a>.</p>
+<pre class="r"><code>query &lt;- DBI::dbSendQuery(con, &quot;
+WITH cte 
+     AS (SELECT city, 
+                year, 
+                month, 
+                sales, 
+                Row_number() 
+                  OVER( 
+                    partition BY city 
+                    ORDER BY sales DESC) AS rownum 
+         FROM   txhousing) 
+SELECT * 
+FROM   cte 
+WHERE  rownum = 1;&quot;)
+DBI::dbFetch(query, n = 6)</code></pre>
+<pre><code>##        city year month sales rownum
+## 1   Abilene 2015     7   268      1
+## 2  Amarillo 2011     8   390      1
+## 3 Arlington 2006     6   720      1
+## 4    Austin 2015     7  3466      1
+## 5  Bay Area 2015     7   849      1
+## 6  Beaumont 2015     7   318      1</code></pre>
+<pre class="r"><code>DBI::dbClearResult(query)</code></pre>
+</div>
+</div>
+
+<footer role="contentinfo" id="site-footer">
+
+<!-- /.bottom-menu -->
+	<p class="copyright">&#169; 2020,
+		powered by <a href="http://www.r-project.org">R</a> + <a href="http://rmarkdown.rstudio.com">RMarkdown</a> + <a href="http://github.com">Github</a>.</p>
+</footer>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
