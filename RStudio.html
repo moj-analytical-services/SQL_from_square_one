@@ -405,8 +405,9 @@ library(DBI)
 # Create an ephemeral in-memory RSQLite database
 con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 
-DBI::dbWriteTable(con, &quot;txhousing&quot;, 
-                  ggplot2::txhousing,
+DBI::dbWriteTable(conn = con, 
+                  name = &quot;txhousing&quot;, 
+                  value = ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
 <p>Here, using the <code>DBI</code> pckage, we send a SQL query to the database ready to be executed.</p>
 <pre class="r"><code>query &lt;- DBI::dbSendQuery(con, 
@@ -461,8 +462,9 @@ head(texas_df)</code></pre>
 <p>Again, we set up a temporary database and write a table to it.</p>
 <pre class="r"><code>con &lt;- DBI::dbConnect(RSQLite::SQLite(), dbname = &quot;:memory:&quot;)
 
-DBI::dbWriteTable(con, &quot;txhousing&quot;, 
-                  ggplot2::txhousing,
+DBI::dbWriteTable(conn = con, 
+                  name = &quot;txhousing&quot;, 
+                  value = ggplot2::txhousing,
                   overwrite = TRUE)</code></pre>
 <p>To use the functionality of <code>dbplyr</code> we use <code>dplyr::tbl()</code>. This tells <code>dplyr</code> that this table is in a database that we have set up a connection for (called <code>con</code>).</p>
 <pre class="r"><code>library(dbplyr)
@@ -519,7 +521,7 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. ..@ loadable.extensions: logi TRUE
 ##   .. .. ..@ flags              : int 70
 ##   .. .. ..@ vfs                : chr &quot;&quot;
-##   .. .. ..@ ref                :&lt;environment: 0x000000001a60e220&gt; 
+##   .. .. ..@ ref                :&lt;environment: 0x00000000193038a0&gt; 
 ##   .. .. ..@ bigint             : chr &quot;integer64&quot;
 ##   ..$ disco: NULL
 ##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_SQLiteConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
@@ -539,7 +541,7 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_base_remote&quot; &quot;op_base&quot; &quot;op&quot;
 ##   .. .. .. .. ..$ dots:List of 1
 ##   .. .. .. .. .. ..$ : language ~year &gt;= 2002
-##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e6f3f70&gt; 
+##   .. .. .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001d410388&gt; 
 ##   .. .. .. .. ..$ args: list()
 ##   .. .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. .. .. ..$ dots:List of 2
@@ -550,19 +552,19 @@ tble &lt;- dplyr::tbl(con, &quot;txhousing&quot;)</code></pre>
 ##   .. .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_group_by&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. .. ..$ dots:List of 1
 ##   .. .. .. ..$ sales: language ~sum(sales, na.rm = TRUE)
-##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e776f98&gt; 
+##   .. .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001d4941e8&gt; 
 ##   .. .. ..$ args: list()
 ##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_summarise&quot; &quot;op_single&quot; &quot;op&quot;
 ##   .. ..$ dots:List of 1
 ##   .. .. ..$ : language ~city %IN% c(&quot;Abilene&quot;, &quot;Arlington&quot;, &quot;Kerrville&quot;)
-##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e78d4a0&gt; 
+##   .. .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001d4ac610&gt; 
 ##   .. ..$ args: list()
 ##   .. ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_filter&quot; &quot;op_single&quot; &quot;op&quot;
 ##   ..$ dots:List of 2
 ##   .. ..$ : language ~city
-##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001d62ba50&gt; 
 ##   .. ..$ : language ~year
-##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001e908bf0&gt; 
+##   .. .. ..- attr(*, &quot;.Environment&quot;)=&lt;environment: 0x000000001d62ba50&gt; 
 ##   ..$ args:List of 1
 ##   .. ..$ .by_group: logi FALSE
 ##   ..- attr(*, &quot;class&quot;)= chr [1:3] &quot;op_arrange&quot; &quot;op_single&quot; &quot;op&quot;
@@ -642,6 +644,7 @@ DBI::dbFetch(query, n = 6)</code></pre>
 ## 5  Bay Area 2015     7   849      1
 ## 6  Beaumont 2015     7   318      1</code></pre>
 <pre class="r"><code>DBI::dbClearResult(query)</code></pre>
+<p>Another conversion failure occurs when a common R function does not have a SQL equivalent. This is well covered in the <a href="https://dbplyr.tidyverse.org/articles/sql.html#what-happens-when-dbplyr-fails">What happens when dbplyr fails?</a> section of the dbplyr reference.</p>
 </div>
 </div>
 

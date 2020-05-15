@@ -30,8 +30,9 @@ library(DBI)
 # Create an ephemeral in-memory RSQLite database
 con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
 
-DBI::dbWriteTable(con, "txhousing", 
-                  ggplot2::txhousing,
+DBI::dbWriteTable(conn = con, 
+                  name = "txhousing", 
+                  value = ggplot2::txhousing,
                   overwrite = TRUE)
 ```
 
@@ -96,8 +97,9 @@ Again, we set up a temporary database and write a table to it.
 ```{r, eval = TRUE}
 con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
 
-DBI::dbWriteTable(con, "txhousing", 
-                  ggplot2::txhousing,
+DBI::dbWriteTable(conn = con, 
+                  name = "txhousing", 
+                  value = ggplot2::txhousing,
                   overwrite = TRUE)
 ```
 
@@ -217,3 +219,5 @@ WHERE  rownum = 1;")
 DBI::dbFetch(query, n = 6)
 DBI::dbClearResult(query)
 ```
+
+Another conversion failure occurs when a common R function does not have a SQL equivalent. This is well covered in the [What happens when dbplyr fails?](https://dbplyr.tidyverse.org/articles/sql.html#what-happens-when-dbplyr-fails) section of the dbplyr reference.

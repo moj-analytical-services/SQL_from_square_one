@@ -43,8 +43,9 @@ To demonstrate CTEs we first create a temporary in-memory database using the [RS
 ```{r, eval = TRUE}
 con <- DBI::dbConnect(RSQLite::SQLite(), dbname = ":memory:")
 
-DBI::dbWriteTable(con, "txhousing", 
-                  ggplot2::txhousing,
+DBI::dbWriteTable(conn = con, 
+                  name = "txhousing", 
+                  value = ggplot2::txhousing,
                   overwrite = TRUE)
 
 texas_df <- DBI::dbReadTable(con, "txhousing")
