@@ -13,7 +13,7 @@ output:
 
 # Why should I learn SQL?
 
-SQL is a fundamental data manipulation language in every industry and profession. Because SQL is used everywhere the skill is in [high demand](https://www.dataquest.io/blog/why-sql-is-the-most-important-language-to-learn/){target="_blank"}. While there are alternatives to SQL, the language remains a core tool that can improve the majority of your projects. This includes data science, reporting, and data engineering.
+SQL is a key fundamental data manipulation language in every industry and profession. Because SQL is used everywhere the skill is in [high demand](https://www.dataquest.io/blog/why-sql-is-the-most-important-language-to-learn/){target="_blank"}. While there are alternatives to SQL, the language remains a core tool that can improve the majority of your projects. This includes data science, reporting, and data engineering.
 
 We would like to increase the use and quality of SQL. For example, using SQL more for ad-hoc reporting (instead of Excel for example) or moving heavy data preparation, say from R code to SQL. As well making your your data preperation faster, SQL will make you more employable if you have genuine SQL examples to describe at interview (but don't leave us just yet!). 
 
